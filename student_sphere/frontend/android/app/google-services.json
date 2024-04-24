@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "96804929606",
+    "firebase_url": "https://student-sphere-2e987-default-rtdb.firebaseio.com",
+    "project_id": "student-sphere-2e987",
+    "storage_bucket": "student-sphere-2e987.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96804929606:android:8f2be8d2f23e009c9b0a47",
+        "android_client_info": {
+          "package_name": "com.example.student_sphere"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpk8v91mpGrndkbIX39AZNairJNcPWhY4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
