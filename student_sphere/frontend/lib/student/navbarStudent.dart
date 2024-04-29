@@ -10,8 +10,8 @@ class NavBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary),
+            decoration:
+                BoxDecoration(color: Theme.of(context).colorScheme.primary),
             child: const Text(
               'Menu',
               style: TextStyle(color: Colors.white, fontSize: 25),
@@ -28,19 +28,20 @@ class NavBar extends StatelessWidget {
             onTap: () => {Navigator.pushNamed(context, '/profile')},
           ),
           ListTile(
-            leading: const Icon(Icons.group),
+            leading: const Icon(Icons.book),
             title: const Text('My Courses'),
             onTap: () => {Navigator.pushNamed(context, '/my_courses')},
           ),
           ListTile(
-            leading: const Icon(Icons.help),
+            leading: const Icon(Icons.edit),
             title: const Text('Modify Courses'),
             onTap: () => {Navigator.pushNamed(context, '/modify_courses')},
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Logout'),
-            onTap: () => {Navigator.popUntil(context, ModalRoute.withName("/"))},
+            onTap: () =>
+                {Navigator.popUntil(context, ModalRoute.withName("/"))},
           ),
         ],
       ),

@@ -42,13 +42,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyB24Pwa559IbkPkNdYPtNUKPSDQmgr575E',
-    appId: '1:96804929606:web:16a4d18ad620f9459b0a47',
-    messagingSenderId: '96804929606',
-    projectId: 'student-sphere-2e987',
     authDomain: 'student-sphere-2e987.firebaseapp.com',
     databaseURL: 'https://student-sphere-2e987-default-rtdb.firebaseio.com',
+    projectId: 'student-sphere-2e987',
     storageBucket: 'student-sphere-2e987.appspot.com',
-    measurementId: 'G-H83BS5719F',
+    messagingSenderId: '96804929606',
+    appId: '1:96804929606:web:16a4d18ad620f9459b0a47',
+    measurementId: 'G-H83BS5719F'
   );
 
   static const FirebaseOptions android = FirebaseOptions(

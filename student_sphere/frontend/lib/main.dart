@@ -1,9 +1,7 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:student_sphere/register.dart';
-import 'admin_home_page.dart';
-import 'student_home_page.dart';
+import 'admin/admin_home_page.dart';
+import 'student/student_home_page.dart';
 import 'user_role.dart';
 import 'user.dart';
 import 'auth_service.dart';
@@ -14,7 +12,6 @@ void main() {
 
 class MainApp extends StatelessWidget {
   const MainApp({Key? key}) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +29,40 @@ class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-      body: const Center(
-        child: LoginForm(),
+      body: Column(
+        children: [
+          // Heading
+          const Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'Welcome to Student Sphere',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // Background image and login form
+          Expanded(
+            child: Stack(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('bg.jpeg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const Center(
+                  child: LoginForm(),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -52,67 +76,81 @@ class LoginForm extends StatelessWidget {
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 250,
-          height: 30,
-          child: TextField(
-            controller: emailController,
-            decoration: InputDecoration(
-              labelText: 'Email',
-            ),
+    return SizedBox(
+      height: 400,
+      child: Card(
+        elevation: 3,// Adjust the elevation as needed
+        margin: EdgeInsets.all(20), // Adjust the margin as needed
+        child: Padding(
+          padding: EdgeInsets.all(20), // Adjust the padding as needed
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 250,
+                height: 90,
+                child: TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    )
+                  ),
+                ),
+              SizedBox(
+                width: 250,
+                height: 90,
+                child: TextField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    ),
+                   obscureText: true,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Perform login logic here
+                    SphereUser? user = await AuthService.loginUser(
+                        emailController.text, passwordController.text);
+                    if (user != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          // Navigate to appropriate screen based on user role
+                          return user.role == UserRole.student
+                              ? StudentHomePage(user: user)
+                              : AdminHomePage(user: user);
+                        }),
+                      );
+                    } else {
+                      // Handle invalid login
+                    }
+                  },
+                  child: const Text('Login'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegistrationPage()),
+                    );
+                  },
+                  child: const Text('Register'),
+                ),
+              )
+            ],
           ),
         ),
-        SizedBox(
-          width: 250,
-          height: 30,
-          child: TextField(
-            controller: passwordController,
-            decoration: InputDecoration(
-              labelText: 'Password',
-            ),
-            obscureText: true,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: ElevatedButton(
-            onPressed: () async {
-              // Perform login logic here
-              SphereUser? user = await AuthService.loginUser(emailController.text, passwordController.text);
-              if (user != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) {
-                    // Navigate to appropriate screen based on user role
-                    return user.role == UserRole.student
-                        ? StudentHomePage(user: user)
-                        : AdminHomePage(user: user);
-                  }),
-                );
-              } else {
-                // Handle invalid login
-              }
-            },
-            child: Text('Login'),
-
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const RegistrationPage()),
-              );
-            },
-            child: Text('Register'),
-          ),
-        )
-      ],
+      ),
     );
+
   }
 }
