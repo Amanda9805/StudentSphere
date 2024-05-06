@@ -1,57 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:student_sphere/admin/admin_modify_courses.dart';
 import 'package:student_sphere/user.dart';
 import 'navbarAdmin.dart';
 import 'degree_page.dart';
 
-class AdminHomePage extends StatelessWidget {
+class AdminModifyPage extends StatelessWidget {
   final SphereUser? user;
-  const AdminHomePage({Key? key, required this.user}) : super(key: key);
+  const AdminModifyPage({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Student Sphere",
-      // Define routes here
-      //initialRoute: '/',
-      //routes: {
-        //'/admin_modify_courses': (context) => AdminModifyPage(user: user),
-      //},
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AdminHome(user: user),
+      home: AdminModify(user: user),
     );
   }
 }
 
-class AdminHome extends StatelessWidget {
+class AdminModify extends StatelessWidget {
   final SphereUser? user;
-  const AdminHome({Key? key, required this.user}) : super(key: key);
+  const AdminModify({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: NavBar(user: user),
       appBar: AppBar(
-        title: Text('Welcome Admin, ${user!.fname} ${user!.lname}'),
+        title: Text('Modify Degrees and Courses'),
       ),
-      body: Center(
-        child: AdminDashboard(user: user),
+      body: const Center(
+        child: AdminModifyDashboard(),
       ),
     );
   }
 }
 
-class AdminDashboard extends StatefulWidget {
-  final SphereUser? user;
-  const AdminDashboard({Key? key, required this.user}) : super(key: key);
+class AdminModifyDashboard extends StatefulWidget {
+  const AdminModifyDashboard({Key? key}) : super(key: key);
 
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> {
+class _AdminDashboardState extends State<AdminModifyDashboard> {
   List<String> undergraduateDegrees = [];
   List<String> postgraduateDegrees = [];
 
@@ -83,6 +76,31 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                onPressed: () async {
+                  final result = await showDialog<Map<String, String>>(
+                    context: context,
+                    builder: (BuildContext context) => AddDegreeModal(),
+                  );
+                  if (result != null) {
+                    final level = result['level'];
+                    final degreeTitle = result['title'];
+                    if (level == 'Undergraduate') {
+                      setState(() {
+                        undergraduateDegrees.add(degreeTitle!);
+                      });
+                    } else if (level == 'Postgraduate') {
+                      setState(() {
+                        postgraduateDegrees.add(degreeTitle!);
+                      });
+                    }
+                  }
+                },
+                child: Icon(Icons.add),
+              ),
+            ),
           ],
         ),
         ListView.builder(
@@ -104,27 +122,39 @@ class _AdminDashboardState extends State<AdminDashboard> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AdminModifyPage(user: widget.user),
+              builder: (context) => DegreePage(),
             ),
           );
         },
         child: Card(
           child: ListTile(
             title: Text(degreeTitle),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                setState(() {
-                  if (level == 'Undergraduate') {
-                    undergraduateDegrees.removeAt(index);
-                  } else if (level == 'Postgraduate') {
-                    postgraduateDegrees.removeAt(index);
-                  }
-                });
-              },
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () {
+                    // Add your edit logic here
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    setState(() {
+                      if (level == 'Undergraduate') {
+                        undergraduateDegrees.removeAt(index);
+                      } else if (level == 'Postgraduate') {
+                        postgraduateDegrees.removeAt(index);
+                      }
+                    });
+                  },
+                ),
+              ],
             ),
           ),
         ),
+
       ),
     );
   }

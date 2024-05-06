@@ -94,11 +94,21 @@ class AuthService {
           print('No data available.');
       }
 
-    return user;
-    } catch(error) {
+      return user;
+    } catch (error) {
+      // Handle login errors here.
       print("Login failed: $error");
+      if (error is FirebaseException) {
+        // Handle Firebase exceptions separately
+        // Example: if (error.code == 'user-not-found') { ... }
+      }
       return null;
     }
   }
+
   // Add more methods as needed
+
+  //add degree
+
+  //add modules to degree
 }

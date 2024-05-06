@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:student_sphere/register.dart';
 import 'admin/admin_home_page.dart';
+import 'admin/admin_modify_courses.dart';
 import 'student/student_home_page.dart';
 import 'user_role.dart';
 import 'user.dart';
@@ -20,13 +21,13 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LoginPage(),
+      home: const InitialPage(),
     );
   }
 }
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class InitialPage extends StatelessWidget {
+  const InitialPage({Key? key}) : super(key: key);
 
   @override
    Widget build(BuildContext context) {

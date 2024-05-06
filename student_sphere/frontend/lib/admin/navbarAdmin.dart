@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:student_sphere/user.dart';
+
+import 'admin_home_page.dart';
+import 'admin_modify_courses.dart';
 
 class NavBar extends StatelessWidget {
-  const NavBar({super.key});
+  final SphereUser? user;
+  const NavBar({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +25,7 @@ class NavBar extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.input),
             title: const Text('Home'),
-            onTap: () => {},
+            onTap: () => {Navigator.push(context, MaterialPageRoute(builder: (context) => AdminHomePage(user: user)))},
           ),
           ListTile(
             leading: const Icon(Icons.verified_user),
@@ -28,9 +33,14 @@ class NavBar extends StatelessWidget {
             onTap: () => {Navigator.pushNamed(context, '/profile')},
           ),
           ListTile(
-            leading: const Icon(Icons.group),
-            title: const Text('About'),
-            onTap: () => {Navigator.pushNamed(context, '/about')},
+            leading: const Icon(Icons.book),
+            title: const Text('Available Courses'),
+            onTap: () => {Navigator.pushNamed(context, '/available_courses')},
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Modify Courses'),
+            onTap: () => {Navigator.push(context, MaterialPageRoute(builder: (context) => AdminModifyPage(user: user)))},
           ),
           ListTile(
             leading: const Icon(Icons.help),
