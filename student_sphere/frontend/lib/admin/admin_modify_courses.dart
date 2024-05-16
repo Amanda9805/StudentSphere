@@ -117,15 +117,15 @@ class _AdminDashboardState extends State<AdminModifyDashboard> {
   Widget _buildDegreeCard(BuildContext context, String degreeTitle, String level, int index) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: GestureDetector(
+      /*child: GestureDetector(
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DegreePage(),
+              builder: (context) => DegreePage(degree: degree),
             ),
           );
-        },
+        },*/
         child: Card(
           child: ListTile(
             title: Text(degreeTitle),
@@ -154,8 +154,6 @@ class _AdminDashboardState extends State<AdminModifyDashboard> {
             ),
           ),
         ),
-
-      ),
     );
   }
 }

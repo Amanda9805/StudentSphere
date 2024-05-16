@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../degree.dart';
+
 class DegreePage extends StatelessWidget {
-  const DegreePage({Key? key}) : super(key: key);
+  final Degree degree;
+  const DegreePage({Key? key, required this.degree}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -10,13 +13,14 @@ class DegreePage extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const DegreeData(),
+      home: DegreeData(degree: degree),
     );
   }
 }
 
 class DegreeData extends StatelessWidget {
-  const DegreeData({Key? key}) : super(key: key);
+  final Degree degree;
+  const DegreeData({Key? key, required this.degree}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

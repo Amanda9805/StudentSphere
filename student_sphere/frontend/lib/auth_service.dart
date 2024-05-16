@@ -1,5 +1,6 @@
 import 'package:student_sphere/user_role.dart';
 import 'package:firebase_database/firebase_database.dart'; 
+import 'degree.dart';
 import 'user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
@@ -107,8 +108,67 @@ class AuthService {
   }
 
   // Add more methods as needed
+  //get degrees
+  static Future<List> fetchDegrees() async {
+    try {
+      final database = FirebaseDatabase.instance;
+      final ref = database.ref();
+      
+      final undergraduateSnapshot = await ref.child('degrees/undergraduate').get();
+      final postgraduateSnapshot = await ref.child('degrees/postgraduate').get();
 
+      final List<Degree> degrees = [];
+
+      if (undergraduateSnapshot.exists) {
+        final Map<dynamic, dynamic> undergraduateDataMap = undergraduateSnapshot.value as Map<dynamic, dynamic>;
+        final List<dynamic> undergraduateData = undergraduateDataMap.values.toList();
+
+        for (var data in undergraduateData) {
+          degrees.add(Degree(
+            title: data['title'],
+            level: 'undergraduate',
+          ));
+        }
+      }
+
+      if (postgraduateSnapshot.exists) {
+        final Map<dynamic, dynamic> postgraduateDataMap = postgraduateSnapshot.value as Map<dynamic, dynamic>;
+        final List<dynamic> postgraduateData = postgraduateDataMap.values.toList();
+
+        for (var data in postgraduateData) {
+          degrees.add(Degree(
+            title: data['title'],
+            level: 'postgraduate',
+          ));
+        }
+      }
+
+      return degrees;
+    } catch (error) {
+      print("Failed to fetch degrees: $error");
+      return [];
+    }
+  }
+  
   //add degree
 
   //add modules to degree
+  static Future<void> addModuleToDegree(Degree degree, String code, String title, String period, int credits) async {
+    try {
+      final database = FirebaseDatabase.instance;
+      final ref = database.ref('degrees/${degree.level}/${degree.title}/modules');
+
+      await ref.push().set({
+        'code': code,
+        'title': title,
+        'period': period,
+        'credits': credits,
+      });
+
+      print('Module added successfully.');
+    } catch (error) {
+      print('Failed to add module: $error');
+      // You can throw an exception here to handle errors in the UI
+    }
+  }
 }

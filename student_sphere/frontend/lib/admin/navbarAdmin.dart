@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:student_sphere/user.dart';
 
+import '../degree.dart';
 import 'admin_home_page.dart';
 import 'admin_modify_courses.dart';
+import 'available_courses.dart';
 
 class NavBar extends StatelessWidget {
   final SphereUser? user;
@@ -35,7 +37,7 @@ class NavBar extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.book),
             title: const Text('Available Courses'),
-            onTap: () => {Navigator.pushNamed(context, '/available_courses')},
+            onTap: () => {Navigator.push(context, MaterialPageRoute(builder: (context) => AdminAvailableCoursesPage(user: user)))},
           ),
           ListTile(
             leading: const Icon(Icons.edit),
