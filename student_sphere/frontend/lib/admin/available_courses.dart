@@ -32,13 +32,12 @@ class AdminAvailableCourses extends StatelessWidget {
       appBar: AppBar(
         title: Text('Modify Degrees and Courses'),
       ),
-      body: const Center(
-        child: AdminAvailableCoursesDashboard(),
+      body: Center(
+        child: AdminAvailableCoursesDashboard(user: user),
       ),
     );
   }
 }
-
 
 class AdminAvailableCoursesDashboard extends StatefulWidget {
   final SphereUser? user;
@@ -127,26 +126,69 @@ class _AdminAvailableCoursesDashboardState extends State<AdminAvailableCoursesDa
     );
   }
 
+  void _showAddDegreeModal(BuildContext context, String level) {
+    TextEditingController titleController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Degree'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: titleController,
+                  decoration: InputDecoration(labelText: 'Title'),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                String title = titleController.text;
+                Degree newDegree = Degree(title: title, level: level);
+
+                await AuthService.addDegree(newDegree);
+                await fetchDegrees(); // Refresh the list after adding a degree
+                
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-  return SingleChildScrollView(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildDegreeList('Undergraduate', undergraduateDegrees),
-        _buildDegreeList('Postgraduate', postgraduateDegrees),
-      ],
-    ),
-  );
-}
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildDegreeList('Undergraduate', undergraduateDegrees),
+          _buildDegreeList('Postgraduate', postgraduateDegrees),
+        ],
+      ),
+    );
+  }
 
   Widget _buildDegreeList(String title, List<Degree> degrees) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
               padding: const EdgeInsets.all(20),
@@ -157,6 +199,12 @@ class _AdminAvailableCoursesDashboardState extends State<AdminAvailableCoursesDa
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                _showAddDegreeModal(context, title.toLowerCase()); // Show the modal dialog for adding a degree
+              },
             ),
           ],
         ),

@@ -150,25 +150,48 @@ class AuthService {
     }
   }
   
-  //add degree
-
-  //add modules to degree
-  static Future<void> addModuleToDegree(Degree degree, String code, String title, String period, int credits) async {
+  // Add a new degree
+  static Future<void> addDegree(Degree degree) async {
     try {
       final database = FirebaseDatabase.instance;
-      final ref = database.ref('degrees/${degree.level}/${degree.title}/modules');
+      final ref = database.ref('degrees/${degree.level}');
 
       await ref.push().set({
-        'code': code,
-        'title': title,
-        'period': period,
-        'credits': credits,
+        'title': degree.title,
+        'level': degree.level,
       });
 
-      print('Module added successfully.');
+      print('Degree added successfully.');
     } catch (error) {
-      print('Failed to add module: $error');
-      // You can throw an exception here to handle errors in the UI
+      print('Failed to add degree: $error');
+    }
+  }
+  
+  //add modules to degree
+  static Future<void> addModuleToDegree(Degree degree, String code, String title, String period, int credits) async {
+     try {
+      final database = FirebaseDatabase.instance;
+      final ref = database.ref('degrees/${degree.level}');
+
+      final snapshot = await ref.orderByChild('title').equalTo(degree.title).get();
+
+      if (snapshot.exists) {
+        final key = (snapshot.value as Map).keys.first;
+        final modulesRef = database.ref('degrees/${degree.level}/$key/modules');
+
+        await modulesRef.push().set({
+          'code': code,
+          'title': title,
+          'period': period,
+          'credits': credits,
+        });
+
+        print('Module added successfully to ${degree.title} ${degree.level} degree.');
+      } else {
+        print('Degree not found.');
+      }
+    } catch (error) {
+      print('Failed to add module to ${degree.title} ${degree.level} degree: $error');
     }
   }
 }
