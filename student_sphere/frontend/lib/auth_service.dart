@@ -25,7 +25,8 @@ class AuthService {
   }
 
   static Future<SphereUser?> registerUser(String fname, String lname,
-      String email, String password, String username, UserRole role) async {
+      String email, String password, String username, UserRole role,
+      {String? degree}) async {
     try {
       // Initialize Firebase if not already initialized.
       initializeFirebase();

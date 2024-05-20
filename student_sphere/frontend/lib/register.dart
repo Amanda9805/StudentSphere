@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'admin/admin_home_page.dart';
 import 'student/student_home_page.dart';
@@ -53,9 +51,7 @@ class Register extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Center(
-                  child: RegisterForm()
-                ),
+                const Center(child: RegisterForm()),
               ],
             ),
           ),
@@ -138,141 +134,187 @@ bool validPassword(BuildContext context, String pass1, String pass2) {
   return false;
 }
 
-class RegisterForm extends StatelessWidget {
+class RegisterForm extends StatefulWidget {
   const RegisterForm({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    TextEditingController fnameController = TextEditingController();
-    TextEditingController lnameController = TextEditingController();
-    TextEditingController snumController = TextEditingController();
-    TextEditingController usernameController = TextEditingController();
-    TextEditingController emailController = TextEditingController();
-    TextEditingController password1Controller = TextEditingController();
-    TextEditingController password2Controller = TextEditingController();
+  _RegisterFormState createState() => _RegisterFormState();
+}
 
-    return SizedBox(
-      height: 600,
+class _RegisterFormState extends State<RegisterForm> {
+  final TextEditingController fnameController = TextEditingController();
+  final TextEditingController lnameController = TextEditingController();
+  final TextEditingController snumController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController password1Controller = TextEditingController();
+  final TextEditingController password2Controller = TextEditingController();
+
+  UserRole _userRole = UserRole.unknown;
+  String? _selectedDegree;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
       child: Card(
-        elevation: 3,// Adjust the elevation as needed
-        margin: EdgeInsets.all(20), // Adjust the margin as needed
+        elevation: 3, // Adjust the elevation as needed
+        margin: const EdgeInsets.all(20), // Adjust the margin as needed
         child: Padding(
-          padding: EdgeInsets.all(20), // Adjust the padding as needed
+          padding: const EdgeInsets.all(20), // Adjust the padding as needed
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-              width: 290,
-              height: 60,
-              child: TextField(
-                key: const Key('fname'),
-                controller: fnameController,
-                decoration: const InputDecoration(
-                  labelText: 'First Name',
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 290,
-              height: 60,
-              child: TextField(
-                key: const Key('lname'),
-                controller: lnameController,
-                decoration: const InputDecoration(
-                  labelText: 'Last Name',
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 290,
-              height: 60,
-              child: TextField(
-                key: const Key('snum'),
-                controller: snumController,
-                decoration: const InputDecoration(
-                    labelText: 'Student or Staff Number',
+                width: 290,
+                height: 60,
+                child: TextField(
+                  key: const Key('fname'),
+                  controller: fnameController,
+                  decoration: const InputDecoration(
+                    labelText: 'First Name',
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
-                    hintText: 'e.g s123456 or a123456'),
-              ),
-            ),
-            SizedBox(
-              width: 290,
-              height: 60,
-              child: TextField(
-                key: const Key('email'),
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              width: 290,
-              height: 60,
-              child: TextField(
-                key: const Key('password1'),
-                controller: password1Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
+              SizedBox(
+                width: 290,
+                height: 60,
+                child: TextField(
+                  key: const Key('lname'),
+                  controller: lnameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Last Name',
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  ),
                 ),
-                obscureText: true,
               ),
-            ),
-            SizedBox(
-              width: 290,
-              height: 60,
-              child: TextField(
-                key: const Key('password2'),
-                controller: password2Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm Password',
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
+              SizedBox(
+                width: 290,
+                height: 60,
+                child: TextField(
+                  key: const Key('snum'),
+                  controller: snumController,
+                  decoration: const InputDecoration(
+                      labelText: 'Student or Staff Number',
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      hintText: 'e.g s123456 or a123456'),
+                  onChanged: (value) {
+                    if (value.length == 7) {
+                      setState(() {
+                        _userRole = checkSnum(context, value);
+                      });
+                    }
+                  },
                 ),
-                obscureText: true,
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: ElevatedButton(
-                onPressed: () async {
-                  // Perform registration logic here
-                  String fname = fnameController.text;
-                  String lname = lnameController.text;
-                  String username = snumController.text;
-                  UserRole role = checkSnum(context, snumController.text);
-                  String email = emailController.text;
-                  String pass = "";
-
-                  SphereUser? user;
-
-                  if (role != UserRole.unknown &&
-                      validPassword(context, password1Controller.text,
-                          password2Controller.text)) {
-                    pass = password1Controller.text;
-                    user = await AuthService.registerUser(
-                        fname, lname, email, pass, username, role);
-                  }
-
-                  if (user != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) {
-                        // Navigate to appropriate screen based on user role
-                        return user?.role == UserRole.student
-                            ? StudentHomePage(user: user)
-                            : AdminHomePage(user: user);
-                      }),
-                    );
-                  } else {
-                    // Handle invalid login
-                  }
-                },
-                child: const Text('Register'),
+              if (_userRole == UserRole.student)
+                SizedBox(
+                  width: 290,
+                  height: 60,
+                  child: DropdownButtonFormField<String>(
+                    key: const Key('degree'),
+                    decoration: const InputDecoration(
+                      labelText: 'Select Your Degree Program',
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    ),
+                    items: [
+                      'BSc Computer Science',
+                      'BIS Multimedia',
+                      'BSc(Hons) Computer Science',
+                      'BIS(Hons) Multimedia',
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedDegree = newValue;
+                      });
+                    },
+                    value: _selectedDegree,
+                  ),
+                ),
+              SizedBox(
+                width: 290,
+                height: 60,
+                child: TextField(
+                  key: const Key('email'),
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  ),
+                ),
               ),
+              SizedBox(
+                width: 290,
+                height: 60,
+                child: TextField(
+                  key: const Key('password1'),
+                  controller: password1Controller,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  ),
+                  obscureText: true,
+                ),
+              ),
+              SizedBox(
+                width: 290,
+                height: 60,
+                child: TextField(
+                  key: const Key('password2'),
+                  controller: password2Controller,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm Password',
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  ),
+                  obscureText: true,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Perform registration logic here
+                    String fname = fnameController.text;
+                    String lname = lnameController.text;
+                    String username = snumController.text;
+                    UserRole role = checkSnum(context, snumController.text);
+                    String email = emailController.text;
+                    String pass = "";
+
+                    SphereUser? user;
+
+                    if (role != UserRole.unknown &&
+                        validPassword(context, password1Controller.text,
+                            password2Controller.text)) {
+                      pass = password1Controller.text;
+                      user = await AuthService.registerUser(
+                          fname, lname, email, pass, username, role,
+                          degree: role == UserRole.student
+                              ? _selectedDegree
+                              : null);
+                    }
+
+                    if (user != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          // Navigate to appropriate screen based on user role
+                          return user!.role == UserRole.student
+                              ? StudentHomePage(user: user)
+                              : AdminHomePage(user: user);
+                        }),
+                      );
+                    } else {
+                      // Handle invalid registration
+                    }
+                  },
+                  child: const Text('Register'),
+                ),
               )
             ],
           ),
