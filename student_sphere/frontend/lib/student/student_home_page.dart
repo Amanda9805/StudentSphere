@@ -48,6 +48,7 @@ class MyCoursesDashboard extends StatefulWidget {
 }
 
 class _MyCoursesDashboardState extends State<MyCoursesDashboard> {
+  //List<Module> studentModules = [];
   List<Module> undergraduateModules = [];
   List<Module> postgraduateModules = [];
 
