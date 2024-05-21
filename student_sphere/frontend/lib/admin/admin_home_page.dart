@@ -322,51 +322,6 @@ class _AdminAvailableCoursesDashboardState
     );
   }
 
-  /*void _showAddDegreeModal(BuildContext context, String level) {
-    TextEditingController titleController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add Degree'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: titleController,
-                  decoration: InputDecoration(labelText: 'Title'),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                String title = titleController.text;
-                Degree newDegree = Degree(title: title, level: level);
-
-                String result = await AuthService.addDegree(newDegree);
-                await fetchDegrees(); // Refresh the list after adding a degree
-
-                Navigator.of(context).pop();
-                _showResultDialog(context, result); // Show result alert dialog
-              },
-              child: Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-*/
   void _showResultDialog(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -402,40 +357,43 @@ class _AdminAvailableCoursesDashboardState
 
   Widget _buildModuleList(String title, List<Module> modules) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.all(15.0),
-          child: Card(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+          child: Center(
+            child: Card(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center, // Adjusted
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: IconButton(
-                        icon: Icon(Icons.add_box),
-                        onPressed: () {
-                          _showAddModuleModal(context);
-                        },
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: IconButton(
+                          icon: Icon(Icons.add_box),
+                          onPressed: () {
+                            _showAddModuleModal(context);
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                buildModuleCard(context, modules), // Pass modules directly
-              ],
+                    ],
+                  ),
+                  buildModuleCard(context, modules), // Pass modules directly
+                ],
+              ),
             ),
           ),
         ),
@@ -634,48 +592,4 @@ class _AdminAvailableCoursesDashboardState
       },
     );
   }
-  /*Widget _buildDegreeCard(BuildContext context, Degree degree) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DegreePage(degree: degree),
-            ),
-          );
-        },
-        child: Card(
-          child: ListTile(
-            title: Text(degree.title),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    _showAddModuleModal(
-                        context); // Show the modal dialog for adding a module
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      if (degree.level == 'undergraduate') {
-                        undergraduateModules.remove(degree);
-                      } else if (degree.level == 'postgraduate') {
-                        postgraduateModules.remove(degree);
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }*/
 }

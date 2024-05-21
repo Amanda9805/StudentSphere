@@ -41,8 +41,8 @@ class StudentModifyCourses extends StatelessWidget {
 }
 
 class StudentModifyCoursesDashboard extends StatefulWidget {
-  final SphereUser? user;
-  const StudentModifyCoursesDashboard({Key? key, this.user}) : super(key: key);
+  late final SphereUser? user;
+  StudentModifyCoursesDashboard({Key? key, this.user}) : super(key: key);
 
   @override
   _StudentModifyCoursesDashboardState createState() =>
@@ -53,6 +53,7 @@ class _StudentModifyCoursesDashboardState
     extends State<StudentModifyCoursesDashboard> {
   List<Module> undergraduateModules = [];
   List<Module> postgraduateModules = [];
+  Set<Module> selectedModules = {}; // Track selected modules
 
   @override
   void initState() {
@@ -69,15 +70,57 @@ class _StudentModifyCoursesDashboardState
 
     setState(() {
       if (isPostgraduate) {
-        // If the degree is postgraduate, display postgraduate modules
+        // If the degree is postgraduate, display only published postgraduate modules
         undergraduateModules = [];
-        postgraduateModules = categorizedModules['postgraduate'] ?? [];
+        postgraduateModules = categorizedModules['postgraduate']
+                ?.where((module) => module.published)
+                .toList() ??
+            [];
       } else {
-        // If the degree is undergraduate or does not contain "Hons", display undergraduate modules
+        // If the degree is undergraduate or does not contain "Hons", display only published undergraduate modules
         postgraduateModules = [];
-        undergraduateModules = categorizedModules['undergraduate'] ?? [];
+        undergraduateModules = categorizedModules['undergraduate']
+                ?.where((module) => module.published)
+                .toList() ??
+            [];
       }
     });
+  }
+
+  void toggleModuleSelection(Module module, bool isSelected) {
+    setState(() {
+      if (isSelected) {
+        selectedModules.add(module);
+      } else {
+        selectedModules.remove(module);
+      }
+    });
+  }
+
+  Future<void> saveChanges() async {
+    try {
+      // Merge selected modules with existing registered modules without duplication
+      final updatedModules = Set<Module>.from(widget.user!.registeredModules);
+      updatedModules.addAll(selectedModules);
+
+      // Update the user object with the new registered modules
+      final updatedUser =
+          widget.user!.copyWith(registeredModules: updatedModules.toList());
+
+      // Update the registered modules in the database
+      await AuthService.updateUserModules(
+          widget.user!.id, updatedModules.toList());
+
+      // Update the user object in the widget tree
+      setState(() {
+        widget.user = updatedUser;
+      });
+
+      _showResultDialog(context, 'Selected modules registered successfully!');
+    } catch (error) {
+      print('Error saving changes: $error');
+      _showResultDialog(context, 'Failed to save changes: $error');
+    }
   }
 
   void _showResultDialog(BuildContext context, String message) {
@@ -108,6 +151,12 @@ class _StudentModifyCoursesDashboardState
         children: [
           _buildModuleList('Undergraduate Courses', undergraduateModules),
           _buildModuleList('Postgraduate Courses', postgraduateModules),
+          Center(
+            child: ElevatedButton(
+              onPressed: saveChanges,
+              child: Text('Save Changes'),
+            ),
+          ),
         ],
       ),
     );
@@ -119,31 +168,29 @@ class _StudentModifyCoursesDashboardState
     if ((title == 'Postgraduate Courses' && isPostgraduate) ||
         (title == 'Undergraduate Courses' && !isPostgraduate)) {
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.all(15.0),
-            child: Card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+            child: Center(
+              child: Card(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        "Available Courses",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                  buildModuleCard(context, modules),
-                ],
+                    ),
+                    buildModuleCard(context, modules),
+                  ],
+                ),
               ),
             ),
           ),
@@ -163,11 +210,11 @@ class _StudentModifyCoursesDashboardState
         DataColumn(label: Text('Credits')),
         DataColumn(label: Text('Period')),
         DataColumn(
-          label: Text('Register'), // Column for Edit and Delete buttons
+          label: Text('Register'), // Column for register checkbox
         ),
       ],
       rows: modules.map((module) {
-        bool isSelected = false; // Add a boolean to track selection
+        bool isSelected = selectedModules.contains(module);
 
         return DataRow(cells: [
           DataCell(Text(module.code)),
@@ -177,15 +224,13 @@ class _StudentModifyCoursesDashboardState
           DataCell(
             Row(
               children: [
-                // Render a Checkbox instead of IconButton
+                // Render a Checkbox
                 Tooltip(
                   message: 'Register',
                   child: Checkbox(
                     value: isSelected,
                     onChanged: (value) {
-                      setState(() {
-                        isSelected = value ?? false;
-                      });
+                      toggleModuleSelection(module, value!);
                     },
                   ),
                 ),

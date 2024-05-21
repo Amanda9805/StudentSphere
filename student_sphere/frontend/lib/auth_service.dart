@@ -44,23 +44,34 @@ class AuthService {
       DatabaseReference ref = FirebaseDatabase.instance.ref('users/$userId');
 
       // Create a map representing the user data
-      await ref.set({
+      Map<String, dynamic> userData = {
+        'id': userId,
         'firstName': fname,
         'lastName': lname,
         'email': email,
         'username': username,
-        'role': role.toString()
-      });
+        'role': role.toString(),
+        'degree': degree,
+      };
+
+      // Add registeredModules field only if the role is student
+      if (role == UserRole.student) {
+        userData['registeredModules'] = [];
+      }
+
+      await ref.set(userData);
 
       print('User data saved successfully.');
 
       SphereUser user = SphereUser(
-          fname: fname,
-          lname: lname,
-          username: username,
-          email: email,
-          role:
-              role); //id: userCredential.user?.uid, email: userCredential.user?.email);
+        id: userId,
+        fname: fname,
+        lname: lname,
+        username: username,
+        email: email,
+        role: role,
+        degree: degree,
+      );
 
       // Return the registered user.
       return user;
@@ -91,18 +102,31 @@ class AuthService {
       if (snapshot.exists) {
         final userData = snapshot.value as Map<dynamic, dynamic>;
 
-        final String fname = userData['firstName'];
-        final String lname = userData['lastName'];
-        final String username = userData['username'];
-        final String email = userData['email'];
-        final UserRole role = getRole(userData['role']);
+        final String id = userData['id'] ?? '';
+        final String fname = userData['firstName'] ?? '';
+        final String lname = userData['lastName'] ?? '';
+        final String username = userData['username'] ?? '';
+        final String email = userData['email'] ?? '';
+        final UserRole role = getRole(userData['role'] ?? 'UserRole.unknown');
+        final String? degree = userData['degree'];
+
+        List<Module> registeredModules = [];
+        if (role == UserRole.student && userData['registeredModules'] != null) {
+          registeredModules = (userData['registeredModules'] as List)
+              .map((moduleData) => Module.fromMap(moduleData))
+              .toList();
+        }
 
         user = SphereUser(
-            fname: fname,
-            lname: lname,
-            email: email,
-            username: username,
-            role: role);
+          id: id,
+          fname: fname,
+          lname: lname,
+          email: email,
+          username: username,
+          role: role,
+          degree: degree,
+          registeredModules: registeredModules,
+        );
       } else {
         print('No data available.');
       }
@@ -149,6 +173,7 @@ class AuthService {
     }
   }
 
+  //fetches all modules
   static Future<Map<String, List<Module>>> fetchModules() async {
     try {
       final database = FirebaseDatabase.instance;
@@ -192,6 +217,92 @@ class AuthService {
         'undergraduate': [],
         'postgraduate': [],
       };
+    }
+  }
+
+  //fetches student's registered modules
+  static Future<List<Module>?> fetchUserModules(String userId) async {
+    try {
+      final database = FirebaseDatabase.instance;
+      final ref = database
+          .ref()
+          .child('users')
+          .child(userId)
+          .child('registeredModules');
+
+      final snapshot = await ref.get();
+
+      if (snapshot.exists) {
+        final List<dynamic>? moduleDataList = snapshot.value as List<dynamic>?;
+        final List<Module>? modules = moduleDataList
+            ?.map((moduleData) => Module.fromMap(moduleData))
+            .toList();
+        return modules;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      print('Error fetching user modules: $error');
+      throw error;
+    }
+  }
+
+  //remove a module from student's registered modules
+  static Future<void> deleteUserModule(String userId, String moduleId) async {
+    try {
+      final DatabaseReference userRef =
+          FirebaseDatabase.instance.ref('users/$userId');
+
+      // Fetch the user's data from the database
+      DatabaseEvent userEvent = await userRef.once();
+      DataSnapshot userSnapshot = userEvent.snapshot;
+
+      // Ensure userSnapshot.value is not null and is a Map
+      if (userSnapshot.value != null) {
+        final userData = userSnapshot.value as Map<dynamic, dynamic>?;
+
+        if (userData != null && userData.containsKey('registeredModules')) {
+          // Get the user's registeredModules
+          final registeredModulesData =
+              userData['registeredModules'] as List<dynamic>?;
+
+          if (registeredModulesData != null) {
+            // Convert dynamic list to a list of Module objects
+            List<Module> registeredModules =
+                registeredModulesData.map((moduleData) {
+              return Module.fromMap(Map<String, dynamic>.from(moduleData));
+            }).toList();
+
+            // Find the index of the module to delete
+            int indexToDelete =
+                registeredModules.indexWhere((module) => module.id == moduleId);
+
+            // If the module is found, remove it from the list
+            if (indexToDelete != -1) {
+              registeredModules.removeAt(indexToDelete);
+
+              // Convert the list of modules back to a list of maps
+              List<Map<String, dynamic>> updatedModulesData =
+                  registeredModules.map((module) => module.toMap()).toList();
+
+              // Update the registeredModules field in the database
+              await userRef.update({'registeredModules': updatedModulesData});
+              print('Database updated successfully');
+            } else {
+              print('Module not found in registeredModules');
+            }
+          } else {
+            print('registeredModules is null');
+          }
+        } else {
+          print('No registeredModules found for user');
+        }
+      } else {
+        print('User data is null');
+      }
+    } catch (error) {
+      print('Error deleting user module: $error');
+      throw error;
     }
   }
 
@@ -248,6 +359,28 @@ class AuthService {
       return 'Module ${isPublished ? "published" : "unpublished"} successfully';
     } catch (e) {
       return 'Error updating module status: $e';
+    }
+  }
+
+  static Future<String> updateUserModules(
+      String userId, List<Module> modules) async {
+    try {
+      final database = FirebaseDatabase.instance;
+      final ref = database.ref().child('users').child(userId);
+
+      // Convert the list of modules to a list of maps
+      List<Map<String, dynamic>> moduleMaps = modules.map((module) {
+        return module.toMap(); // Assuming Module class has a toMap method
+      }).toList();
+
+      // Update the registeredModules field in the user data
+      await ref.update({
+        'registeredModules': moduleMaps,
+      });
+
+      return 'Module registration success';
+    } catch (e) {
+      return 'Error registering for module: $e';
     }
   }
 
