@@ -22,27 +22,49 @@ class StudentModifyCoursesPage extends StatelessWidget {
   }
 }
 
-class StudentModifyCourses extends StatelessWidget {
+class StudentModifyCourses extends StatefulWidget {
   final SphereUser? user;
   const StudentModifyCourses({Key? key, required this.user}) : super(key: key);
+
+  @override
+  _StudentModifyCoursesState createState() => _StudentModifyCoursesState();
+}
+
+class _StudentModifyCoursesState extends State<StudentModifyCourses> {
+  SphereUser? user;
+
+  @override
+  void initState() {
+    super.initState();
+    user = widget.user;
+  }
+
+  void updateUser(SphereUser newUser) {
+    setState(() {
+      user = newUser;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: NavBar(user: user),
       appBar: AppBar(
-        title: Text('Welcome Student, ${user!.fname} ${user!.lname}'),
+        title: Text('Modify Courses'),
       ),
       body: Center(
-        child: StudentModifyCoursesDashboard(user: user),
+        child:
+            StudentModifyCoursesDashboard(user: user, updateUser: updateUser),
       ),
     );
   }
 }
 
 class StudentModifyCoursesDashboard extends StatefulWidget {
-  late final SphereUser? user;
-  StudentModifyCoursesDashboard({Key? key, this.user}) : super(key: key);
+  final SphereUser? user;
+  final Function(SphereUser) updateUser; // Callback function
+  StudentModifyCoursesDashboard({Key? key, this.user, required this.updateUser})
+      : super(key: key);
 
   @override
   _StudentModifyCoursesDashboardState createState() =>
@@ -104,17 +126,16 @@ class _StudentModifyCoursesDashboardState
       updatedModules.addAll(selectedModules);
 
       // Update the user object with the new registered modules
-      final updatedUser =
-          widget.user!.copyWith(registeredModules: updatedModules.toList());
+      final updatedUser = widget.user!.copyWith(
+        registeredModules: updatedModules.toList(),
+      );
 
       // Update the registered modules in the database
       await AuthService.updateUserModules(
           widget.user!.id, updatedModules.toList());
 
-      // Update the user object in the widget tree
-      setState(() {
-        widget.user = updatedUser;
-      });
+      // Call the callback function to update the user object in the parent widget
+      widget.updateUser(updatedUser);
 
       _showResultDialog(context, 'Selected modules registered successfully!');
     } catch (error) {
