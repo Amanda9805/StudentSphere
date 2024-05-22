@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:student_sphere/register.dart';
 import 'admin/admin_home_page.dart';
@@ -7,13 +8,47 @@ import 'student/student_home_page.dart';
 import 'user_role.dart';
 import 'user.dart';
 import 'auth_service.dart';
+import 'package:idle_detector_wrapper/idle_detector_wrapper.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(MaterialApp(
+    home: MainApp(),
+  ));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({Key? key}) : super(key: key);
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  void _logout() async {
+    try {
+      await FirebaseAuth.instance.signOut(); // Sign out the user
+      navigatorKey.currentState!.pushReplacement(MaterialPageRoute(builder: (context) => MainApp()));
+    } catch (e) {
+      print("Error signing out: $e");
+      // Handle any errors, such as displaying an error message to the user
+    }
+  }
+
+  void _showSessionExpiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Session Expired"),
+          content: Text("Your session has expired after 5 minutes of inactivity."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _logout(); // Log out the user after dismissing the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +57,15 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const InitialPage(),
+      navigatorKey: navigatorKey,
+      home: IdleDetector(
+        idleTime: const Duration(minutes: 5),
+        onIdle: () {
+          // Show session expired dialog when the user becomes idle
+          _showSessionExpiredDialog(context);
+        },
+        child: InitialPage(),
+      ),
     );
   }
 }
