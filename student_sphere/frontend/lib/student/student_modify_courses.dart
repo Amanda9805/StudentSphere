@@ -7,7 +7,10 @@ import 'navbarStudent.dart';
 
 class StudentModifyCoursesPage extends StatelessWidget {
   final SphereUser? user;
-  const StudentModifyCoursesPage({Key? key, required this.user})
+  final Function(SphereUser) updateUser;
+
+  const StudentModifyCoursesPage(
+      {Key? key, required this.user, required this.updateUser})
       : super(key: key);
 
   @override
@@ -17,44 +20,34 @@ class StudentModifyCoursesPage extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: StudentModifyCourses(user: user),
+      home: StudentModifyCourses(user: user, updateUser: updateUser),
     );
   }
 }
 
 class StudentModifyCourses extends StatefulWidget {
   final SphereUser? user;
-  const StudentModifyCourses({Key? key, required this.user}) : super(key: key);
+  final Function(SphereUser) updateUser;
+
+  const StudentModifyCourses(
+      {Key? key, required this.user, required this.updateUser})
+      : super(key: key);
 
   @override
   _StudentModifyCoursesState createState() => _StudentModifyCoursesState();
 }
 
 class _StudentModifyCoursesState extends State<StudentModifyCourses> {
-  SphereUser? user;
-
-  @override
-  void initState() {
-    super.initState();
-    user = widget.user;
-  }
-
-  void updateUser(SphereUser newUser) {
-    setState(() {
-      user = newUser;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavBar(user: user),
+      drawer: NavBar(user: widget.user, updateUser: widget.updateUser),
       appBar: AppBar(
         title: Text('Modify Courses'),
       ),
       body: Center(
-        child:
-            StudentModifyCoursesDashboard(user: user, updateUser: updateUser),
+        child: StudentModifyCoursesDashboard(
+            user: widget.user, updateUser: widget.updateUser),
       ),
     );
   }
@@ -63,6 +56,7 @@ class _StudentModifyCoursesState extends State<StudentModifyCourses> {
 class StudentModifyCoursesDashboard extends StatefulWidget {
   final SphereUser? user;
   final Function(SphereUser) updateUser; // Callback function
+
   StudentModifyCoursesDashboard({Key? key, this.user, required this.updateUser})
       : super(key: key);
 
@@ -75,7 +69,7 @@ class _StudentModifyCoursesDashboardState
     extends State<StudentModifyCoursesDashboard> {
   List<Module> undergraduateModules = [];
   List<Module> postgraduateModules = [];
-  Set<Module> selectedModules = {}; // Track selected modules
+  List<Module> selectedModules = [];
 
   @override
   void initState() {
@@ -86,20 +80,16 @@ class _StudentModifyCoursesDashboardState
   Future<void> fetchModules() async {
     final Map<String, List<Module>> categorizedModules =
         await AuthService.fetchModules();
-
-    final bool isPostgraduate = widget.user!.degree!
-        .contains("Hons"); // Check if degree contains "Hons"
+    final bool isPostgraduate = widget.user!.degree!.contains("Hons");
 
     setState(() {
       if (isPostgraduate) {
-        // If the degree is postgraduate, display only published postgraduate modules
         undergraduateModules = [];
         postgraduateModules = categorizedModules['postgraduate']
                 ?.where((module) => module.published)
                 .toList() ??
             [];
       } else {
-        // If the degree is undergraduate or does not contain "Hons", display only published undergraduate modules
         postgraduateModules = [];
         undergraduateModules = categorizedModules['undergraduate']
                 ?.where((module) => module.published)
@@ -109,57 +99,59 @@ class _StudentModifyCoursesDashboardState
     });
   }
 
-  void toggleModuleSelection(Module module, bool isSelected) {
-  setState(() {
-    if (isSelected) {
-      selectedModules.add(module);
-    } else {
-      selectedModules.remove(module);
-    }
-    // Log the current state of selectedModules
-    print('Selected modules: $selectedModules');
-  });
-}
-
-
-Future<void> saveChanges() async {
-  try {
-    // Merge selected modules with existing registered modules without duplication
-    final updatedModules = Set<Module>.from(widget.user!.registeredModules);
-    updatedModules.addAll(selectedModules);
-
-    // Identify newly selected modules by removing existing modules from selectedModules
-    final newModules = selectedModules.difference(updatedModules);
-
-    // Update the user object with the new registered modules
-    final updatedUser = widget.user!.copyWith(
-      registeredModules: updatedModules.toList(),
-    );
-
-    // Update the registered modules in the database
-    await AuthService.updateUserModules(
-      widget.user!.id,
-      newModules.toList(), // Only update the database with newly selected modules
-    );
-
-    // Call the callback function to update the user object in the parent widget
-    widget.updateUser(updatedUser);
-
-    _showResultDialog(context, 'Selected modules registered successfully!');
-
-    // Clear the selectedModules set
+  void toggleModuleSelection(Module module) {
     setState(() {
-      selectedModules.clear();
+      if (selectedModules.contains(module)) {
+        selectedModules.remove(module);
+      } else {
+        // Check if the module is not already registered
+        bool isModuleRegistered = widget.user!.registeredModules
+            .any((registeredModule) => registeredModule.id == module.id);
+        if (!isModuleRegistered) {
+          selectedModules.add(module);
+        } else {
+          // Show a dialog indicating that the module is already registered
+          _showResultDialog(
+              context, 'Module ${module.code} is already registered.');
+        }
+      }
     });
-  } catch (error) {
-    print('Error saving changes: $error');
-    _showResultDialog(context, 'Failed to save changes: $error');
   }
-}
 
+  void saveChanges() async {
+    try {
+      // Fetch the existing registered modules
+      final List<Module>? registeredModules =
+          await AuthService.fetchUserModules(widget.user!.id);
+      if (registeredModules == null) {
+        throw Exception("Failed to fetch registered modules.");
+      }
 
+      // Combine the existing registered modules with the selected modules
+      final List<Module> updatedModules = [
+        ...registeredModules,
+        ...selectedModules
+      ];
 
+      // Convert the combined modules to Map<String, dynamic> for database update
+      final List<Map<String, dynamic>> updatedModulesData =
+          updatedModules.map((module) => module.toMap()).toList();
 
+      // Update the user's registeredModules in the database
+      await AuthService.updateUserModules(widget.user!.id, updatedModulesData);
+
+      // Show a dialog to indicate that changes are saved
+      _showResultDialog(context, 'Changes saved successfully.');
+
+      // Clear selected modules
+      setState(() {
+        selectedModules.clear();
+      });
+    } catch (error) {
+      print("Error saving changes: $error");
+      _showResultDialog(context, 'Failed to save changes: $error');
+    }
+  }
 
   void _showResultDialog(BuildContext context, String message) {
     showDialog(
@@ -235,48 +227,35 @@ Future<void> saveChanges() async {
         ],
       );
     } else {
-      // Return an empty container if the condition is not met
       return Container();
     }
   }
 
   Widget buildModuleCard(BuildContext context, List<Module> modules) {
-  return DataTable(
-    columns: [
-      DataColumn(label: Text('Module Code')),
-      DataColumn(label: Text('Module Title')),
-      DataColumn(label: Text('Credits')),
-      DataColumn(label: Text('Period')),
-      DataColumn(
-        label: Text('Register'), // Column for register checkbox
-      ),
-    ],
-    rows: modules.map((module) {
-      bool isSelected = selectedModules.contains(module);
-
-      return DataRow(cells: [
-        DataCell(Text(module.code)),
-        DataCell(Text(module.title)),
-        DataCell(Text(module.credits.toString())),
-        DataCell(Text(module.period)),
-        DataCell(
-          Row(
-            children: [
-              // Render a Checkbox
-              Tooltip(
-                message: 'Register',
-                child: Checkbox(
-                  value: isSelected,
-                  onChanged: (value) {
-                    toggleModuleSelection(module, value!);
-                  },
-                ),
-              ),
-            ],
+    return DataTable(
+      columns: [
+        DataColumn(label: Text('Module Code')),
+        DataColumn(label: Text('Module Title')),
+        DataColumn(label: Text('Credits')),
+        DataColumn(label: Text('Period')),
+        DataColumn(label: Text('Register')),
+      ],
+      rows: modules.map((module) {
+        return DataRow(cells: [
+          DataCell(Text(module.code)),
+          DataCell(Text(module.title)),
+          DataCell(Text(module.credits.toString())),
+          DataCell(Text(module.period)),
+          DataCell(
+            Checkbox(
+              value: selectedModules.contains(module),
+              onChanged: (bool? value) {
+                toggleModuleSelection(module);
+              },
+            ),
           ),
-        ),
-      ]);
-    }).toList(),
-  );
+        ]);
+      }).toList(),
+    );
+  }
 }
-    }

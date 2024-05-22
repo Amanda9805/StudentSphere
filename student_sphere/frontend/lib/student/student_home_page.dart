@@ -5,9 +5,30 @@ import '../degree.dart';
 import '../module.dart';
 import 'navbarStudent.dart';
 
-class StudentHomePage extends StatelessWidget {
-  final SphereUser? user;
-  const StudentHomePage({Key? key, required this.user}) : super(key: key);
+class StudentHomePage extends StatefulWidget {
+  final SphereUser? initialUser;
+
+  const StudentHomePage({Key? key, required this.initialUser})
+      : super(key: key);
+
+  @override
+  _StudentHomePageState createState() => _StudentHomePageState();
+}
+
+class _StudentHomePageState extends State<StudentHomePage> {
+  SphereUser? user;
+
+  @override
+  void initState() {
+    super.initState();
+    user = widget.initialUser;
+  }
+
+  void updateUser(SphereUser newUser) {
+    setState(() {
+      user = newUser;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,24 +37,27 @@ class StudentHomePage extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: StudentHome(user: user),
+      home: StudentHome(user: user, updateUser: updateUser),
     );
   }
 }
 
 class StudentHome extends StatelessWidget {
   final SphereUser? user;
-  const StudentHome({Key? key, required this.user}) : super(key: key);
+  final Function(SphereUser) updateUser;
+
+  const StudentHome({Key? key, required this.user, required this.updateUser})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavBar(user: user),
+      drawer: NavBar(user: user, updateUser: updateUser),
       appBar: AppBar(
         title: Text('Welcome Student, ${user!.fname} ${user!.lname}'),
       ),
       body: Center(
-        child: StudentHomeDashboard(user: user),
+        child: StudentHomeDashboard(user: user, updateUser: updateUser),
       ),
     );
   }
@@ -41,7 +65,11 @@ class StudentHome extends StatelessWidget {
 
 class StudentHomeDashboard extends StatefulWidget {
   final SphereUser? user;
-  const StudentHomeDashboard({Key? key, this.user}) : super(key: key);
+  final Function(SphereUser) updateUser;
+
+  const StudentHomeDashboard(
+      {Key? key, required this.user, required this.updateUser})
+      : super(key: key);
 
   @override
   _StudentHomeDashboardState createState() => _StudentHomeDashboardState();
@@ -63,6 +91,12 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
       setState(() {
         registeredModules = modules!;
       });
+
+      print('Registered Modules:');
+      for (Module module in registeredModules) {
+        print('Code: ${module.code}');
+        print('-----------------------');
+      }
     } catch (error) {
       print('Error fetching registered modules: $error');
     }
@@ -70,9 +104,6 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
 
   void _deleteModule(Module module) async {
     try {
-      // Print user object before deletion
-      print('User before deletion: ${widget.user}');
-
       // Remove the module from the registeredModules list
       setState(() {
         registeredModules.remove(module);
@@ -83,12 +114,17 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
 
       // Manually update the user's registeredModules list
       final updatedUser = widget.user!.copyWith(
-        registeredModules: List.from(widget.user!.registeredModules)
-          ..remove(module),
+        registeredModules: registeredModules,
       );
 
-      // Print user object after deletion
-      print('User after deletion: $updatedUser');
+      // Update the state with the new user object via the callback
+      widget.updateUser(updatedUser);
+
+      print('Updated Modules:');
+      for (Module module in registeredModules) {
+        print('Code: ${module.code}');
+        print('-----------------------');
+      }
 
       // Display success message
       ScaffoldMessenger.of(context).showSnackBar(

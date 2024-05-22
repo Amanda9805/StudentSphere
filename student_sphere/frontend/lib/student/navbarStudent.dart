@@ -1,15 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:student_sphere/user.dart';
-
-import '../degree.dart';
 import '../main.dart';
 import 'student_home_page.dart';
 import 'student_modify_courses.dart';
 
 class NavBar extends StatelessWidget {
   final SphereUser? user;
-  const NavBar({super.key, required this.user});
+  final Function(SphereUser) updateUser; // Add updateUser as a parameter
+
+  const NavBar({Key? key, required this.user, required this.updateUser})
+      : super(key: key);
 
   void _logout(BuildContext context) async {
     try {
@@ -43,20 +44,9 @@ class NavBar extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => StudentHomePage(user: user)))
+                      builder: (context) => StudentHomePage(initialUser: user)))
             },
           ),
-          /*ListTile(
-            leading: const Icon(Icons.book),
-            title: const Text('Available Courses'),
-            onTap: () => {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AdminAvailableCoursesPage(user: user)))
-            },
-          ),*/
           ListTile(
             leading: const Icon(Icons.edit),
             title: const Text('Modify Courses'),
@@ -64,20 +54,10 @@ class NavBar extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          StudentModifyCoursesPage(user: user)))
+                      builder: (context) => StudentModifyCoursesPage(
+                          user: user, updateUser: updateUser)))
             },
           ),
-          /*ListTile(
-            leading: const Icon(Icons.help),
-            title: const Text('Help'),
-            onTap: () => {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => StudentHelpPage(user: user)))
-            },
-          ),*/
           ListTile(
             leading: const Icon(Icons.verified_user),
             title: const Text('Profile'),

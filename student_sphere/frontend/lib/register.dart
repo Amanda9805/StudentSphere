@@ -306,7 +306,7 @@ class _RegisterFormState extends State<RegisterForm> {
                         MaterialPageRoute(builder: (context) {
                           // Navigate to appropriate screen based on user role
                           return user!.role == UserRole.student
-                              ? StudentHomePage(user: user)
+                              ? StudentHomePage(initialUser: user)
                               : AdminHomePage(user: user);
                         }),
                       );

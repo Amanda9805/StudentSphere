@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:student_sphere/register.dart';
 import 'admin/admin_home_page.dart';
 import 'admin/admin_modify_courses.dart';
+import 'module.dart';
 import 'student/student_home_page.dart';
 import 'user_role.dart';
 import 'user.dart';
@@ -30,7 +31,7 @@ class InitialPage extends StatelessWidget {
   const InitialPage({Key? key}) : super(key: key);
 
   @override
-   Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
@@ -80,7 +81,7 @@ class LoginForm extends StatelessWidget {
     return SizedBox(
       height: 400,
       child: Card(
-        elevation: 3,// Adjust the elevation as needed
+        elevation: 3, // Adjust the elevation as needed
         margin: EdgeInsets.all(20), // Adjust the margin as needed
         child: Padding(
           padding: EdgeInsets.all(20), // Adjust the padding as needed
@@ -91,13 +92,12 @@ class LoginForm extends StatelessWidget {
                 width: 250,
                 height: 90,
                 child: TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    floatingLabelBehavior: FloatingLabelBehavior.auto,
-                    )
-                  ),
-                ),
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    )),
+              ),
               SizedBox(
                 width: 250,
                 height: 90,
@@ -106,8 +106,8 @@ class LoginForm extends StatelessWidget {
                   decoration: const InputDecoration(
                     labelText: 'Password',
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
-                    ),
-                   obscureText: true,
+                  ),
+                  obscureText: true,
                 ),
               ),
               Padding(
@@ -123,7 +123,7 @@ class LoginForm extends StatelessWidget {
                         MaterialPageRoute(builder: (context) {
                           // Navigate to appropriate screen based on user role
                           return user.role == UserRole.student
-                              ? StudentHomePage(user: user)
+                              ? StudentHomePage(initialUser: user)
                               : AdminHomePage(user: user);
                         }),
                       );
@@ -152,6 +152,5 @@ class LoginForm extends StatelessWidget {
         ),
       ),
     );
-
   }
 }
