@@ -110,39 +110,56 @@ class _StudentModifyCoursesDashboardState
   }
 
   void toggleModuleSelection(Module module, bool isSelected) {
-    setState(() {
-      if (isSelected) {
-        selectedModules.add(module);
-      } else {
-        selectedModules.remove(module);
-      }
-    });
-  }
-
-  Future<void> saveChanges() async {
-    try {
-      // Merge selected modules with existing registered modules without duplication
-      final updatedModules = Set<Module>.from(widget.user!.registeredModules);
-      updatedModules.addAll(selectedModules);
-
-      // Update the user object with the new registered modules
-      final updatedUser = widget.user!.copyWith(
-        registeredModules: updatedModules.toList(),
-      );
-
-      // Update the registered modules in the database
-      await AuthService.updateUserModules(
-          widget.user!.id, updatedModules.toList());
-
-      // Call the callback function to update the user object in the parent widget
-      widget.updateUser(updatedUser);
-
-      _showResultDialog(context, 'Selected modules registered successfully!');
-    } catch (error) {
-      print('Error saving changes: $error');
-      _showResultDialog(context, 'Failed to save changes: $error');
+  setState(() {
+    if (isSelected) {
+      selectedModules.add(module);
+    } else {
+      selectedModules.remove(module);
     }
+    // Log the current state of selectedModules
+    print('Selected modules: $selectedModules');
+  });
+}
+
+
+Future<void> saveChanges() async {
+  try {
+    // Merge selected modules with existing registered modules without duplication
+    final updatedModules = Set<Module>.from(widget.user!.registeredModules);
+    updatedModules.addAll(selectedModules);
+
+    // Identify newly selected modules by removing existing modules from selectedModules
+    final newModules = selectedModules.difference(updatedModules);
+
+    // Update the user object with the new registered modules
+    final updatedUser = widget.user!.copyWith(
+      registeredModules: updatedModules.toList(),
+    );
+
+    // Update the registered modules in the database
+    await AuthService.updateUserModules(
+      widget.user!.id,
+      newModules.toList(), // Only update the database with newly selected modules
+    );
+
+    // Call the callback function to update the user object in the parent widget
+    widget.updateUser(updatedUser);
+
+    _showResultDialog(context, 'Selected modules registered successfully!');
+
+    // Clear the selectedModules set
+    setState(() {
+      selectedModules.clear();
+    });
+  } catch (error) {
+    print('Error saving changes: $error');
+    _showResultDialog(context, 'Failed to save changes: $error');
   }
+}
+
+
+
+
 
   void _showResultDialog(BuildContext context, String message) {
     showDialog(
@@ -224,42 +241,42 @@ class _StudentModifyCoursesDashboardState
   }
 
   Widget buildModuleCard(BuildContext context, List<Module> modules) {
-    return DataTable(
-      columns: [
-        DataColumn(label: Text('Module Code')),
-        DataColumn(label: Text('Module Title')),
-        DataColumn(label: Text('Credits')),
-        DataColumn(label: Text('Period')),
-        DataColumn(
-          label: Text('Register'), // Column for register checkbox
-        ),
-      ],
-      rows: modules.map((module) {
-        bool isSelected = selectedModules.contains(module);
+  return DataTable(
+    columns: [
+      DataColumn(label: Text('Module Code')),
+      DataColumn(label: Text('Module Title')),
+      DataColumn(label: Text('Credits')),
+      DataColumn(label: Text('Period')),
+      DataColumn(
+        label: Text('Register'), // Column for register checkbox
+      ),
+    ],
+    rows: modules.map((module) {
+      bool isSelected = selectedModules.contains(module);
 
-        return DataRow(cells: [
-          DataCell(Text(module.code)),
-          DataCell(Text(module.title)),
-          DataCell(Text(module.credits.toString())),
-          DataCell(Text(module.period)),
-          DataCell(
-            Row(
-              children: [
-                // Render a Checkbox
-                Tooltip(
-                  message: 'Register',
-                  child: Checkbox(
-                    value: isSelected,
-                    onChanged: (value) {
-                      toggleModuleSelection(module, value!);
-                    },
-                  ),
+      return DataRow(cells: [
+        DataCell(Text(module.code)),
+        DataCell(Text(module.title)),
+        DataCell(Text(module.credits.toString())),
+        DataCell(Text(module.period)),
+        DataCell(
+          Row(
+            children: [
+              // Render a Checkbox
+              Tooltip(
+                message: 'Register',
+                child: Checkbox(
+                  value: isSelected,
+                  onChanged: (value) {
+                    toggleModuleSelection(module, value!);
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ]);
-      }).toList(),
-    );
-  }
+        ),
+      ]);
+    }).toList(),
+  );
 }
+    }
