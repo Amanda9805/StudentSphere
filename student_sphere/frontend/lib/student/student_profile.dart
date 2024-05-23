@@ -88,7 +88,7 @@ class ProfilePage extends StatelessWidget {
         children: [
           Center(
             child: Image.asset(
-              'images/profile.png',
+              'assets/images/profile.png',
               width: 100.0,
               height: 100.0,
             ),
