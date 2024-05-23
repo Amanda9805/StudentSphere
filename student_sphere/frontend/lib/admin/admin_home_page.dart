@@ -136,99 +136,110 @@ class _AdminAvailableCoursesDashboardState
   }*/
 
   void _showAddModuleModal(BuildContext context) {
-    TextEditingController codeController = TextEditingController();
-    TextEditingController titleController = TextEditingController();
-    TextEditingController periodController = TextEditingController();
-    TextEditingController creditsController = TextEditingController();
-    String? selectedLevel;
-    bool published = false; // Initialize with false
+  TextEditingController codeController = TextEditingController();
+  TextEditingController titleController = TextEditingController();
+  TextEditingController periodController = TextEditingController();
+  TextEditingController creditsController = TextEditingController();
+  String? selectedLevel;
+  bool published = false; // Initialize with false
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(builder: (context, setState) {
-          return AlertDialog(
-            title: Text('Add Module'),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    controller: codeController,
-                    decoration: InputDecoration(labelText: 'Module Code'),
-                  ),
-                  TextFormField(
-                    controller: titleController,
-                    decoration: InputDecoration(labelText: 'Title'),
-                  ),
-                  TextFormField(
-                    controller: periodController,
-                    decoration: InputDecoration(labelText: 'Period'),
-                  ),
-                  TextFormField(
-                    controller: creditsController,
-                    decoration: InputDecoration(labelText: 'Credits'),
-                  ),
-                  DropdownButtonFormField<String>(
-                    value: selectedLevel,
-                    hint: Text('Select Level'),
-                    items: ['Undergraduate', 'Postgraduate']
-                        .map((level) => DropdownMenuItem(
-                              value: level,
-                              child: Text(level),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedLevel = value;
-                      });
-                    },
-                    decoration: InputDecoration(labelText: 'Level'),
-                  ),
-                  DropdownButtonFormField<bool>(
-                    value: published,
-                    hint: Text('Published'),
-                    items: [
-                      DropdownMenuItem(
-                        value: true,
-                        child: Text('Yes'),
-                      ),
-                      DropdownMenuItem(
-                        value: false,
-                        child: Text('No'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        published = value!;
-                      });
-                    },
-                    decoration: InputDecoration(labelText: 'Publish'),
-                  ),
-                ],
-              ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          title: Text('Add Module'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: codeController,
+                  decoration: InputDecoration(labelText: 'Module Code'),
+                ),
+                TextFormField(
+                  controller: titleController,
+                  decoration: InputDecoration(labelText: 'Title'),
+                ),
+                TextFormField(
+                  controller: periodController,
+                  decoration: InputDecoration(labelText: 'Period'),
+                ),
+                TextFormField(
+                  controller: creditsController,
+                  decoration: InputDecoration(labelText: 'Credits'),
+                ),
+                DropdownButtonFormField<String>(
+                  value: selectedLevel,
+                  hint: Text('Select Level'),
+                  items: ['Undergraduate', 'Postgraduate']
+                      .map((level) => DropdownMenuItem(
+                            value: level,
+                            child: Text(level),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedLevel = value;
+                    });
+                  },
+                  decoration: InputDecoration(labelText: 'Level'),
+                ),
+                DropdownButtonFormField<bool>(
+                  value: published,
+                  hint: Text('Published'),
+                  items: [
+                    DropdownMenuItem(
+                      value: true,
+                      child: Text('Yes'),
+                    ),
+                    DropdownMenuItem(
+                      value: false,
+                      child: Text('No'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      published = value!;
+                    });
+                  },
+                  decoration: InputDecoration(labelText: 'Publish'),
+                ),
+              ],
             ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  String code = codeController.text;
-                  String title = titleController.text;
-                  String period = periodController.text;
-                  String credits = creditsController.text;
-                  String level = selectedLevel ?? '';
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                String code = codeController.text;
+                String title = titleController.text;
+                String period = periodController.text;
+                String credits = creditsController.text;
+                String level = selectedLevel ?? '';
 
-                  if (code.isEmpty ||
-                      title.isEmpty ||
-                      period.isEmpty ||
-                      credits.isEmpty ||
-                      level.isEmpty) {
-                    _showResultDialog(context, "All fields must be completed.");
+                if (code.isEmpty ||
+                    title.isEmpty ||
+                    period.isEmpty ||
+                    credits.isEmpty ||
+                    level.isEmpty) {
+                  _showResultDialog(context, "All fields must be completed.");
+                } else {
+                  // Check if the module already exists
+                  bool isDuplicateUndergrad = undergraduateModules.any((module) =>
+                      (module.code).toLowerCase() == code.toLowerCase());
+
+                  bool isDuplicatePostgrad = postgraduateModules.any((module) =>
+                      (module.code).toLowerCase() == code.toLowerCase());
+
+                  if (isDuplicateUndergrad || isDuplicatePostgrad) {
+                    _showResultDialog(
+                        context, "Module already exists.");
                   } else {
                     int creditsValue = int.tryParse(credits) ?? 0;
                     String result = await AuthService.addModule(
@@ -244,15 +255,17 @@ class _AdminAvailableCoursesDashboardState
                     _showResultDialog(context, result);
                     fetchModules();
                   }
-                },
-                child: Text('Save'),
-              ),
-            ],
-          );
-        });
-      },
-    );
-  }
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      });
+    },
+  );
+}
+
 
   void _showEditModuleModal(BuildContext context, Module module) {
     TextEditingController codeController =
