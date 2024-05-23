@@ -7,6 +7,7 @@ import '../main.dart';
 import 'admin_help.dart';
 import 'admin_home_page.dart';
 import 'admin_modify_courses.dart';
+import 'admin_profile.dart';
 import 'available_courses.dart';
 
 class NavBar extends StatelessWidget {
@@ -30,10 +31,15 @@ class NavBar extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
+          const DrawerHeader(
             decoration:
-                BoxDecoration(color: Theme.of(context).colorScheme.primary),
-            child: const Text(
+                BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('images/bg.jpeg'),
+                      fit: BoxFit.cover,
+                    ),
+                ),
+            child: Text(
               'Menu',
               style: TextStyle(color: Colors.white, fontSize: 25),
             ),
@@ -70,6 +76,15 @@ class NavBar extends StatelessWidget {
             },
           ),*/
           ListTile(
+            leading: const Icon(Icons.person_2_rounded),
+            title: const Text('Profile'),
+            onTap: () => { Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AdminProfilePage(user: user)))
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.help),
             title: const Text('Help'),
             onTap: () => {
@@ -78,11 +93,6 @@ class NavBar extends StatelessWidget {
                   MaterialPageRoute(
                       builder: (context) => AdminHelpPage(user: user)))
             },
-          ),
-          ListTile(
-            leading: const Icon(Icons.verified_user),
-            title: const Text('Profile'),
-            onTap: () => {Navigator.pushNamed(context, '/profile')},
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app),

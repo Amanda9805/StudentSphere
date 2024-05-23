@@ -4,6 +4,7 @@ import 'package:student_sphere/user.dart';
 import '../main.dart';
 import 'student_home_page.dart';
 import 'student_modify_courses.dart';
+import 'student_profile.dart';
 
 class NavBar extends StatelessWidget {
   final SphereUser? user;
@@ -29,10 +30,15 @@ class NavBar extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
+          const DrawerHeader(
             decoration:
-                BoxDecoration(color: Theme.of(context).colorScheme.primary),
-            child: const Text(
+                BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('images/bg.jpeg'),
+                      fit: BoxFit.cover,
+                    ),
+                ),
+            child: Text(
               'Menu',
               style: TextStyle(color: Colors.white, fontSize: 25),
             ),
@@ -59,9 +65,14 @@ class NavBar extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.verified_user),
+            leading: const Icon(Icons.person_2_rounded),
             title: const Text('Profile'),
-            onTap: () => {Navigator.pushNamed(context, '/profile')},
+            onTap: () => {Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => StudentProfilePage(
+                          user: user)))
+            },
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app),
