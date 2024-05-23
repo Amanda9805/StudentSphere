@@ -24,7 +24,7 @@ class AuthService {
     }
   }
 
-  static Future<SphereUser?> registerUser(String fname, String lname,
+ static Future<SphereUser?> registerUser(String fname, String lname,
       String email, String password, String username, UserRole role,
       {String? degree}) async {
     try {
@@ -75,10 +75,28 @@ class AuthService {
 
       // Return the registered user.
       return user;
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'email-already-in-use':
+          errorMessage = 'The email address is already in use by another account.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'Email/password accounts are not enabled.';
+          break;
+        case 'weak-password':
+          errorMessage = 'The password is too weak.';
+          break;
+        default:
+          errorMessage = 'Registration failed. Please try again.';
+      }
+      throw errorMessage;
     } catch (error) {
-      // Handle registration errors here.
-      print("Registration failed: $error");
-      return null; // Return null if registration fails.
+      // Handle other errors
+      throw 'Registration failed. Please try again.';
     }
   }
 
