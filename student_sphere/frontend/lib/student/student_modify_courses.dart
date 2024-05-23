@@ -118,6 +118,10 @@ class _StudentModifyCoursesDashboardState
     });
   }
 
+  int calculateTotalCredits() {
+    return selectedModules.fold(0, (total, module) => total + module.credits);
+  } 
+  
   void saveChanges() async {
     try {
       // Fetch the existing registered modules
@@ -181,6 +185,26 @@ class _StudentModifyCoursesDashboardState
         children: [
           _buildModuleList('Undergraduate Courses', undergraduateModules),
           _buildModuleList('Postgraduate Courses', postgraduateModules),
+          Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    'Total Credits Selected:',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    calculateTotalCredits().toString(),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          SizedBox(height: 20),
           Center(
             child: ElevatedButton(
               onPressed: saveChanges,

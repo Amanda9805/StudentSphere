@@ -84,6 +84,10 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
     fetchRegisteredModules();
   }
 
+  int calculateTotalCredits() {
+    return registeredModules.fold(0, (total, module) => total + module.credits);
+  } 
+
   Future<void> fetchRegisteredModules() async {
     try {
       final List<Module>? modules =
@@ -145,6 +149,25 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildModuleList('Registered Courses', registeredModules),
+          Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    'Total Credits:',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    calculateTotalCredits().toString(),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
