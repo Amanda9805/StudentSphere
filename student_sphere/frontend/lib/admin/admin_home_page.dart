@@ -1,10 +1,34 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:student_sphere/user.dart';
 import '../auth_service.dart';
 import '../degree.dart';
+import '../main.dart';
 import '../module.dart';
+import '../user_role.dart';
 import 'navbarAdmin.dart';
 import 'degree_page.dart';
+
+class AccessDeniedDialog extends StatelessWidget {
+  final Function() onOkayPressed;
+
+  const AccessDeniedDialog({Key? key, required this.onOkayPressed}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Access Denied'),
+      content: Text('You need to be an admin to access this page.'),
+      actions: <Widget>[
+        ElevatedButton(
+          onPressed: onOkayPressed,
+          child: Text('Okay'),
+        ),
+      ],
+    );
+  }
+}
+
 
 class AdminHomePage extends StatelessWidget {
   final SphereUser? user;
@@ -12,6 +36,29 @@ class AdminHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     // Check if the user is an admin before allowing access
+    if (user?.role != UserRole.administrator) {
+      // Render an access denied page or redirect the user to another page
+      return Scaffold(
+        body: Center(
+          child: AccessDeniedDialog(
+            onOkayPressed: () async {
+              // Log out the user when "Okay" is clicked
+              try {
+                await FirebaseAuth.instance.signOut();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MainApp()),
+                );
+              } catch (e) {
+                print("Error signing out: $e");
+                // Handle any errors, such as displaying an error message to the user
+              }
+            },
+          ),
+        ),
+      );
+    }
     return MaterialApp(
       title: "Student Sphere",
       theme: ThemeData(

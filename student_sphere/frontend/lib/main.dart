@@ -99,7 +99,7 @@ class InitialPage extends StatelessWidget {
                 Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('assets/images/bg.jpeg'),
+                      image: AssetImage('images/bg.jpeg'),
                       fit: BoxFit.cover,
                     ),
                   ),

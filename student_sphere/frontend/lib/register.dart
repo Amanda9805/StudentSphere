@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'admin/admin_home_page.dart';
+import 'main.dart';
 import 'module.dart';
 import 'student/student_home_page.dart';
 import 'user_role.dart';
@@ -27,27 +28,26 @@ class Register extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(
+          onPressed: () {
+            Navigator.push(
+          context, MaterialPageRoute(builder: (context) => MainApp()));
+          },
+        ),
+        title: const Text('Sign Up'),
+        centerTitle: true,
+      ),
       body: Column(
         children: [
-          // Heading
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Text(
-              'Sign Up',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          // Background image and login form
+          // Background image and registration form
           Expanded(
             child: Stack(
               children: [
                 Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('assets/images/bg.jpeg'),
+                      image: AssetImage('images/bg.jpeg'),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -289,29 +289,47 @@ class _RegisterFormState extends State<RegisterForm> {
 
                     SphereUser? user;
 
-                    if (role != UserRole.unknown &&
-                        validPassword(context, password1Controller.text,
-                            password2Controller.text)) {
-                      pass = password1Controller.text;
-                      user = await AuthService.registerUser(
-                          fname, lname, email, pass, username, role,
-                          degree: role == UserRole.student
-                              ? _selectedDegree
-                              : null);
-                    }
+                    try {
+                      if (role != UserRole.unknown &&
+                          validPassword(context, password1Controller.text,
+                              password2Controller.text)) {
+                        pass = password1Controller.text;
+                        user = await AuthService.registerUser(
+                            fname, lname, email, pass, username, role,
+                            degree: role == UserRole.student
+                                ? _selectedDegree
+                                : null);
+                      }
 
-                    if (user != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          // Navigate to appropriate screen based on user role
-                          return user!.role == UserRole.student
-                              ? StudentHomePage(initialUser: user)
-                              : AdminHomePage(user: user);
-                        }),
+                      if (user != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) {
+                            // Navigate to appropriate screen based on user role
+                            return user!.role == UserRole.student
+                                ? StudentHomePage(initialUser: user)
+                                : AdminHomePage(user: user);
+                          }),
+                        );
+                      }
+                    } catch (error) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Registration Error'),
+                            content: Text(error.toString()),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
                       );
-                    } else {
-                      // Handle invalid registration
                     }
                   },
                   child: const Text('Register'),
