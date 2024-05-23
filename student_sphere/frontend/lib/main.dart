@@ -9,12 +9,15 @@ import 'user_role.dart';
 import 'user.dart';
 import 'auth_service.dart';
 import 'package:idle_detector_wrapper/idle_detector_wrapper.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 
 void main() {
+  AuthService.initializeFirebase();
   runApp(MaterialApp(
     home: MainApp(),
   ));
 }
+
 
 class MainApp extends StatelessWidget {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -113,21 +116,27 @@ class InitialPage extends StatelessWidget {
   }
 }
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   const LoginForm({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
+  _LoginFormState createState() => _LoginFormState();
+}
 
+class _LoginFormState extends State<LoginForm> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  bool showErrorMessage = false;
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       height: 400,
       child: Card(
-        elevation: 3, // Adjust the elevation as needed
-        margin: EdgeInsets.all(20), // Adjust the margin as needed
+        elevation: 3,
+        margin: EdgeInsets.all(20),
         child: Padding(
-          padding: EdgeInsets.all(20), // Adjust the padding as needed
+          padding: EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -135,11 +144,12 @@ class LoginForm extends StatelessWidget {
                 width: 250,
                 height: 90,
                 child: TextField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      floatingLabelBehavior: FloatingLabelBehavior.auto,
-                    )),
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  ),
+                ),
               ),
               SizedBox(
                 width: 250,
@@ -153,10 +163,22 @@ class LoginForm extends StatelessWidget {
                   obscureText: true,
                 ),
               ),
+              if (showErrorMessage)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Text(
+                    'Email or password is incorrect',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.all(10),
                 child: ElevatedButton(
                   onPressed: () async {
+                    setState(() {
+                      showErrorMessage = false;
+                    });
+
                     // Perform login logic here
                     SphereUser? user = await AuthService.loginUser(
                         emailController.text, passwordController.text);
@@ -172,6 +194,9 @@ class LoginForm extends StatelessWidget {
                       );
                     } else {
                       // Handle invalid login
+                      setState(() {
+                        showErrorMessage = true;
+                      });
                     }
                   },
                   child: const Text('Login'),

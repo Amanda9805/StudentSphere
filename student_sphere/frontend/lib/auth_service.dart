@@ -83,65 +83,66 @@ class AuthService {
   }
 
   static Future<SphereUser?> loginUser(String email, String password) async {
-    try {
-      // Initialize Firebase if not already initialized.
-      initializeFirebase();
+  try {
+    // Initialize Firebase if not already initialized.
+    initializeFirebase();
 
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+    UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    SphereUser? user;
+
+    String userId = userCredential.user!.uid;
+    final ref = FirebaseDatabase.instance.ref();
+    final snapshot = await ref.child('users/$userId').get();
+
+    if (snapshot.exists) {
+      final userData = snapshot.value as Map<dynamic, dynamic>;
+
+      final String id = userData['id'] ?? '';
+      final String fname = userData['firstName'] ?? '';
+      final String lname = userData['lastName'] ?? '';
+      final String username = userData['username'] ?? '';
+      final String email = userData['email'] ?? '';
+      final UserRole role = getRole(userData['role'] ?? 'UserRole.unknown');
+      final String? degree = userData['degree'];
+
+      List<Module> registeredModules = [];
+      if (role == UserRole.student && userData['registeredModules'] != null) {
+        registeredModules = (userData['registeredModules'] as List)
+            .map((moduleData) => Module.fromMap(moduleData))
+            .toList();
+      }
+
+      user = SphereUser(
+        id: id,
+        fname: fname,
+        lname: lname,
         email: email,
-        password: password,
+        username: username,
+        role: role,
+        degree: degree,
+        registeredModules: registeredModules,
       );
-
-      SphereUser? user;
-
-      String userId = userCredential.user!.uid;
-      final ref = FirebaseDatabase.instance.ref();
-      final snapshot = await ref.child('users/$userId').get();
-
-      if (snapshot.exists) {
-        final userData = snapshot.value as Map<dynamic, dynamic>;
-
-        final String id = userData['id'] ?? '';
-        final String fname = userData['firstName'] ?? '';
-        final String lname = userData['lastName'] ?? '';
-        final String username = userData['username'] ?? '';
-        final String email = userData['email'] ?? '';
-        final UserRole role = getRole(userData['role'] ?? 'UserRole.unknown');
-        final String? degree = userData['degree'];
-
-        List<Module> registeredModules = [];
-        if (role == UserRole.student && userData['registeredModules'] != null) {
-          registeredModules = (userData['registeredModules'] as List)
-              .map((moduleData) => Module.fromMap(moduleData))
-              .toList();
-        }
-
-        user = SphereUser(
-          id: id,
-          fname: fname,
-          lname: lname,
-          email: email,
-          username: username,
-          role: role,
-          degree: degree,
-          registeredModules: registeredModules,
-        );
-      } else {
-        print('No data available.');
-      }
-
-      return user;
-    } catch (error) {
-      // Handle login errors here.
-      print("Login failed: $error");
-      if (error is FirebaseException) {
-        // Handle Firebase exceptions separately
-        // Example: if (error.code == 'user-not-found') { ... }
-      }
-      return null;
+    } else {
+      print('No data available.');
     }
+
+    return user;
+  } catch (error) {
+    // Handle login errors here.
+    print("Login failed: $error");
+    if (error is FirebaseException) {
+      // Handle Firebase exceptions separately
+      // Example: if (error.code == 'user-not-found') { ... }
+    }
+    return null;
   }
+}
+
 
   //fetches all modules
   static Future<Map<String, List<Module>>> fetchModules() async {
