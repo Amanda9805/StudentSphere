@@ -44,7 +44,7 @@ class NavBar extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.input),
+            leading: const Icon(Icons.home_filled),
             title: const Text('Home'),
             onTap: () => {
               Navigator.push(
