@@ -80,7 +80,7 @@ UserRole checkSnum(BuildContext context, String snum) {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('OK'),
+                child: const Text('OK', style: TextStyle(color: Color(0xFF01324D))),
               ),
             ],
           );
@@ -100,7 +100,7 @@ UserRole checkSnum(BuildContext context, String snum) {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('OK'),
+              child: const Text('OK', style: TextStyle(color: Color(0xFF01324D))),
             ),
           ],
         );
@@ -125,7 +125,7 @@ bool validPassword(BuildContext context, String pass1, String pass2) {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('OK'),
+              child: const Text('OK', style: TextStyle(color: Color(0xFF01324D))),
             ),
           ],
         );
@@ -302,14 +302,26 @@ class _RegisterFormState extends State<RegisterForm> {
                       }
 
                       if (user != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) {
-                            // Navigate to appropriate screen based on user role
-                            return user!.role == UserRole.student
-                                ? StudentHomePage(initialUser: user)
-                                : AdminHomePage(user: user);
-                          }),
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Verify Email'),
+                              content: const Text(
+                                  'A verification link has been sent to your email. Please verify your email before logging in.'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => MainApp()));
+                                  },
+                                  child: const Text('OK', style: TextStyle(color: Color(0xFF01324D))),
+                                ),
+                              ],
+                            );
+                          },
                         );
                       }
                     } catch (error) {
@@ -324,7 +336,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
-                                child: const Text('OK'),
+                                child: const Text('OK', style: TextStyle(color: Color(0xFF01324D))),
                               ),
                             ],
                           );
@@ -332,7 +344,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       );
                     }
                   },
-                  child: const Text('Register'),
+                  child: const Text('Register', style: TextStyle(color: Color(0xFF01324D))),
                 ),
               )
             ],

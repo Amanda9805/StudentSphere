@@ -41,7 +41,7 @@ class MainApp extends StatelessWidget {
           content: Text("Your session has expired after 5 minutes of inactivity."),
           actions: <Widget>[
             TextButton(
-              child: Text("OK"),
+              child: Text("OK", style: TextStyle(color: Color(0xFF01324D))),
               onPressed: () {
                 Navigator.of(context).pop();
                 _logout(); // Log out the user after dismissing the dialog
@@ -183,15 +183,42 @@ class _LoginFormState extends State<LoginForm> {
                     SphereUser? user = await AuthService.loginUser(
                         emailController.text, passwordController.text);
                     if (user != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          // Navigate to appropriate screen based on user role
-                          return user.role == UserRole.student
-                              ? StudentHomePage(initialUser: user)
-                              : AdminHomePage(user: user);
-                        }),
-                      );
+                      User? authUser = FirebaseAuth.instance.currentUser;
+
+                      if (authUser != null && authUser.emailVerified) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) {
+                            // Navigate to appropriate screen based on user role
+                            return user.role == UserRole.student
+                                ? StudentHomePage(initialUser: user)
+                                : AdminHomePage(user: user);
+                          }),
+                        );
+                      } else {
+                        // Show verification dialog
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Verify Email'),
+                              content: const Text('Please verify your email before logging in.'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => InitialPage()),
+                                    );
+                                  },
+                                  child: const Text('OK', style: TextStyle(color: Color(0xFF01324D))),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     } else {
                       // Handle invalid login
                       setState(() {
@@ -199,7 +226,7 @@ class _LoginFormState extends State<LoginForm> {
                       });
                     }
                   },
-                  child: const Text('Login'),
+                  child: const Text('Login', style: TextStyle(color: Color(0xFF01324D))),
                 ),
               ),
               Padding(
@@ -212,7 +239,7 @@ class _LoginFormState extends State<LoginForm> {
                           builder: (context) => const RegistrationPage()),
                     );
                   },
-                  child: const Text('Register'),
+                  child: const Text('Register', style: TextStyle(color: Color(0xFF01324D))),
                 ),
               )
             ],
@@ -222,3 +249,4 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 }
+

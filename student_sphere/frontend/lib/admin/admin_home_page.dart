@@ -408,7 +408,7 @@ class _AdminAvailableCoursesDashboardState
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+              child: Text('OK', style: TextStyle(color: Color(0xFF01324D))),
             ),
           ],
         );
@@ -564,7 +564,7 @@ class _AdminAvailableCoursesDashboardState
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Color(0xFF01324D))),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -588,7 +588,7 @@ class _AdminAvailableCoursesDashboardState
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Publish Module'),
+          title: Text('Publish Module', style: TextStyle(color: Color(0xFF01324D))),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -607,7 +607,7 @@ class _AdminAvailableCoursesDashboardState
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Color(0xFF01324D))),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -617,7 +617,7 @@ class _AdminAvailableCoursesDashboardState
                 _showResultDialog(context, result); // Show result alert dialog
                 fetchModules(); // Refresh the modules list
               },
-              child: Text('Publish'),
+              child: Text('Publish', style: TextStyle(color: Color(0xFF01324D))),
             ),
           ],
         );
@@ -649,7 +649,7 @@ class _AdminAvailableCoursesDashboardState
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Color(0xFF01324D))),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -659,7 +659,7 @@ class _AdminAvailableCoursesDashboardState
                 _showResultDialog(context, result); // Show result alert dialog
                 fetchModules(); // Refresh the modules list
               },
-              child: Text('Unpublish'),
+              child: Text('Unpublish', style: TextStyle(color: Color(0xFF01324D))),
             ),
           ],
         );

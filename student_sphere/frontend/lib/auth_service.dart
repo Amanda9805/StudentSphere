@@ -73,6 +73,14 @@ class AuthService {
         degree: degree,
       );
 
+      User? authUser = FirebaseAuth.instance.currentUser;
+
+      if (authUser!= null && !authUser.emailVerified) {
+        await authUser.sendEmailVerification();
+        print('Verification email sent.');
+      }
+
+
       // Return the registered user.
       return user;
     } on FirebaseAuthException catch (e) {
@@ -99,6 +107,8 @@ class AuthService {
       throw 'Registration failed. Please try again.';
     }
   }
+
+  
 
   static Future<SphereUser?> loginUser(String email, String password) async {
   try {
@@ -148,6 +158,7 @@ class AuthService {
     } else {
       print('No data available.');
     }
+
 
     return user;
   } catch (error) {
