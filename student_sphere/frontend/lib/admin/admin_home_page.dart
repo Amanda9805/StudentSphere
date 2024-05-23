@@ -22,7 +22,7 @@ class AccessDeniedDialog extends StatelessWidget {
       actions: <Widget>[
         ElevatedButton(
           onPressed: onOkayPressed,
-          child: Text('Okay'),
+          child: Text('Okay', style: TextStyle(color: Color(0xFF01324D))),
         ),
       ],
     );
@@ -77,8 +77,22 @@ class AdminAvailableCourses extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: NavBar(user: user),
-      appBar: AppBar(
-        title: Text('Welcome Admin, ${user!.fname} ${user!.lname}'),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60), // Set the desired height
+        child: AppBar(
+          title: Text(
+            'Welcome Admin, ${user!.fname} ${user!.lname}', 
+            style: TextStyle(color: Colors.white)
+            ),
+          backgroundColor: Color(0xFF01324D),
+          elevation: 0, // Remove the shadow
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20), // Adjust the value as needed
+            ),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
       body: Center(
         child: AdminAvailableCoursesDashboard(user: user),
@@ -213,7 +227,7 @@ class _AdminAvailableCoursesDashboardState
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Color(0xFF01324D))),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -257,7 +271,7 @@ class _AdminAvailableCoursesDashboardState
                   }
                 }
               },
-              child: Text('Save'),
+              child: Text('Save', style: TextStyle(color: Color(0xFF01324D))),
             ),
           ],
         );
@@ -349,7 +363,7 @@ class _AdminAvailableCoursesDashboardState
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Color(0xFF01324D))),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -374,7 +388,7 @@ class _AdminAvailableCoursesDashboardState
                 _showResultDialog(context, result); // Show result alert dialog
                 fetchModules();
               },
-              child: Text('Save Changes'),
+              child: Text('Save Changes', style: TextStyle(color: Color(0xFF01324D))),
             ),
           ],
         );

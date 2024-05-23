@@ -47,7 +47,7 @@ class Register extends StatelessWidget {
                 Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('images/bg.jpeg'),
+                      image: AssetImage('images/bg2.jpg'),
                       fit: BoxFit.cover,
                     ),
                   ),

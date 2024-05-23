@@ -42,8 +42,22 @@ class _StudentModifyCoursesState extends State<StudentModifyCourses> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: NavBar(user: widget.user, updateUser: widget.updateUser),
-      appBar: AppBar(
-        title: Text('Modify Courses'),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60), // Set the desired height
+        child: AppBar(
+          title: Text(
+            'Modify Courses', 
+            style: TextStyle(color: Colors.white)
+            ),
+          backgroundColor: Color(0xFF01324D),
+          elevation: 0, // Remove the shadow
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20), // Adjust the value as needed
+            ),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
       body: Center(
         child: StudentModifyCoursesDashboard(
@@ -208,7 +222,10 @@ class _StudentModifyCoursesDashboardState
           Center(
             child: ElevatedButton(
               onPressed: saveChanges,
-              child: Text('Save Changes'),
+              child: Text(
+                'Save Changes',
+                style: TextStyle(color: Color(0xFF01324D))
+              ),
             ),
           ),
         ],

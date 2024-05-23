@@ -26,8 +26,22 @@ class AdminHelp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: NavBar(user: user),
-      appBar: AppBar(
-        title: Text('Help'),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60), // Set the desired height
+        child: AppBar(
+          title: Text(
+            'Help', 
+            style: TextStyle(color: Colors.white)
+            ),
+          backgroundColor: Color(0xFF01324D),
+          elevation: 0, // Remove the shadow
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20), // Adjust the value as needed
+            ),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
       body: Center(
         child: HelpPage(),

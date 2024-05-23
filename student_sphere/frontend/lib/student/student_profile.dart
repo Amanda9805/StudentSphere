@@ -52,8 +52,18 @@ class _StudentProfileState extends State<StudentProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: NavBar(user: widget.user, updateUser: widget.updateUser),
-      appBar: AppBar(
-        //title: Text('Profile'),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60), // Set the desired height
+        child: AppBar(
+          backgroundColor: Color(0xFF01324D),
+          elevation: 0, // Remove the shadow
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20), // Adjust the value as needed
+            ),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
       body: Center(
         child: ProfilePage(user: widget.user),

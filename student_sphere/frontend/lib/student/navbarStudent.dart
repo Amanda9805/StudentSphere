@@ -34,7 +34,7 @@ class NavBar extends StatelessWidget {
             decoration:
                 BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage('images/bg.jpeg'),
+                      image: AssetImage('images/bg2.jpg'),
                       fit: BoxFit.cover,
                     ),
                 ),

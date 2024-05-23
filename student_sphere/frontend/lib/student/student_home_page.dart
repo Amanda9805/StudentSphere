@@ -53,8 +53,22 @@ class StudentHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: NavBar(user: user, updateUser: updateUser),
-      appBar: AppBar(
-        title: Text('Welcome Student, ${user!.fname} ${user!.lname}'),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60), // Set the desired height
+        child: AppBar(
+          title: Text(
+            'Welcome Student, ${user!.fname} ${user!.lname}', 
+            style: TextStyle(color: Colors.white)
+            ),
+          backgroundColor: Color(0xFF01324D),
+          elevation: 0, // Remove the shadow
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20), // Adjust the value as needed
+            ),
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
       body: Center(
         child: StudentHomeDashboard(user: user, updateUser: updateUser),
