@@ -1,5 +1,6 @@
 import 'package:student_sphere/user_role.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'announcement.dart';
 import 'degree.dart';
 import 'module.dart';
 import 'user.dart';
@@ -24,7 +25,7 @@ class AuthService {
     }
   }
 
- static Future<SphereUser?> registerUser(String fname, String lname,
+  static Future<SphereUser?> registerUser(String fname, String lname,
       String email, String password, String username, UserRole role,
       {String? degree}) async {
     try {
@@ -75,11 +76,10 @@ class AuthService {
 
       User? authUser = FirebaseAuth.instance.currentUser;
 
-      if (authUser!= null && !authUser.emailVerified) {
+      if (authUser != null && !authUser.emailVerified) {
         await authUser.sendEmailVerification();
         print('Verification email sent.');
       }
-
 
       // Return the registered user.
       return user;
@@ -87,7 +87,8 @@ class AuthService {
       String errorMessage;
       switch (e.code) {
         case 'email-already-in-use':
-          errorMessage = 'The email address is already in use by another account.';
+          errorMessage =
+              'The email address is already in use by another account.';
           break;
         case 'invalid-email':
           errorMessage = 'The email address is not valid.';
@@ -108,70 +109,66 @@ class AuthService {
     }
   }
 
-  
-
   static Future<SphereUser?> loginUser(String email, String password) async {
-  try {
-    // Initialize Firebase if not already initialized.
-    initializeFirebase();
+    try {
+      // Initialize Firebase if not already initialized.
+      initializeFirebase();
 
-    UserCredential userCredential =
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    SphereUser? user;
+      SphereUser? user;
 
-    String userId = userCredential.user!.uid;
-    final ref = FirebaseDatabase.instance.ref();
-    final snapshot = await ref.child('users/$userId').get();
+      String userId = userCredential.user!.uid;
+      final ref = FirebaseDatabase.instance.ref();
+      final snapshot = await ref.child('users/$userId').get();
 
-    if (snapshot.exists) {
-      final userData = snapshot.value as Map<dynamic, dynamic>;
+      if (snapshot.exists) {
+        final userData = snapshot.value as Map<dynamic, dynamic>;
 
-      final String id = userData['id'] ?? '';
-      final String fname = userData['firstName'] ?? '';
-      final String lname = userData['lastName'] ?? '';
-      final String username = userData['username'] ?? '';
-      final String email = userData['email'] ?? '';
-      final UserRole role = getRole(userData['role'] ?? 'UserRole.unknown');
-      final String? degree = userData['degree'];
+        final String id = userData['id'] ?? '';
+        final String fname = userData['firstName'] ?? '';
+        final String lname = userData['lastName'] ?? '';
+        final String username = userData['username'] ?? '';
+        final String email = userData['email'] ?? '';
+        final UserRole role = getRole(userData['role'] ?? 'UserRole.unknown');
+        final String? degree = userData['degree'];
 
-      List<Module> registeredModules = [];
-      if (role == UserRole.student && userData['registeredModules'] != null) {
-        registeredModules = (userData['registeredModules'] as List)
-            .map((moduleData) => Module.fromMap(moduleData))
-            .toList();
+        List<Module> registeredModules = [];
+        if (role == UserRole.student && userData['registeredModules'] != null) {
+          registeredModules = (userData['registeredModules'] as List)
+              .map((moduleData) => Module.fromMap(moduleData))
+              .toList();
+        }
+
+        user = SphereUser(
+          id: id,
+          fname: fname,
+          lname: lname,
+          email: email,
+          username: username,
+          role: role,
+          degree: degree,
+          registeredModules: registeredModules,
+        );
+      } else {
+        print('No data available.');
       }
 
-      user = SphereUser(
-        id: id,
-        fname: fname,
-        lname: lname,
-        email: email,
-        username: username,
-        role: role,
-        degree: degree,
-        registeredModules: registeredModules,
-      );
-    } else {
-      print('No data available.');
+      return user;
+    } catch (error) {
+      // Handle login errors here.
+      print("Login failed: $error");
+      if (error is FirebaseException) {
+        // Handle Firebase exceptions separately
+        // Example: if (error.code == 'user-not-found') { ... }
+      }
+      return null;
     }
-
-
-    return user;
-  } catch (error) {
-    // Handle login errors here.
-    print("Login failed: $error");
-    if (error is FirebaseException) {
-      // Handle Firebase exceptions separately
-      // Example: if (error.code == 'user-not-found') { ... }
-    }
-    return null;
   }
-}
-
 
   //fetches all modules
   static Future<Map<String, List<Module>>> fetchModules() async {
@@ -217,6 +214,42 @@ class AuthService {
         'undergraduate': [],
         'postgraduate': [],
       };
+    }
+  }
+
+  static Future<List<Announcement>?> fetchAnnouncements(Module module) async {
+    try {
+      final database = FirebaseDatabase.instance;
+      final ref = database.ref().child('modules/${module.id}/announcements');
+      final snapshot = await ref.get();
+
+      if (snapshot.exists) {
+        final Map<dynamic, dynamic>? announcementsData =
+            snapshot.value as Map<dynamic, dynamic>?;
+        print('Announcements Data: $announcementsData');
+
+        if (announcementsData != null) {
+          final List<Announcement> announcements = [];
+          announcementsData.forEach((key, value) {
+            if (value is Map<dynamic, dynamic>) {
+              announcements
+                  .add(Announcement.fromMap(Map<String, dynamic>.from(value)));
+            }
+          });
+
+          print('Parsed Announcements: $announcements');
+          return announcements;
+        } else {
+          print('Announcements data is null');
+          return [];
+        }
+      } else {
+        print('Announcements snapshot does not exist');
+        return [];
+      }
+    } catch (error) {
+      print('Failed to fetch announcements: $error');
+      throw error;
     }
   }
 
@@ -400,68 +433,22 @@ class AuthService {
     }
   }
 
-  /*static Future<List<Degree>> fetchDegrees() async {
+  static Future<void> addAnnouncement(
+      Module module, String title, String description) async {
     try {
-      final database = FirebaseDatabase.instance;
-      final ref = database.ref();
+      DatabaseReference announcementsRef =
+          FirebaseDatabase.instance.ref('modules/${module.id}/announcements');
 
-      final undergraduateSnapshot =
-          await ref.child('degrees/undergraduate').get();
-      final postgraduateSnapshot =
-          await ref.child('degrees/postgraduate').get();
+      Announcement newAnnouncement = Announcement(
+        title: title,
+        description: description,
+        date: DateTime.now(),
+      );
 
-      final List<Degree> degrees = [];
-
-      if (undergraduateSnapshot.exists) {
-        final Map<dynamic, dynamic> undergraduateDataMap =
-            undergraduateSnapshot.value as Map<dynamic, dynamic>;
-        final List<dynamic> undergraduateData =
-            undergraduateDataMap.values.toList();
-
-        for (var data in undergraduateData) {
-          degrees.add(Degree(
-            title: data['title'],
-            level: 'undergraduate',
-          ));
-        }
-      }
-
-      if (postgraduateSnapshot.exists) {
-        final Map<dynamic, dynamic> postgraduateDataMap =
-            postgraduateSnapshot.value as Map<dynamic, dynamic>;
-        final List<dynamic> postgraduateData =
-            postgraduateDataMap.values.toList();
-
-        for (var data in postgraduateData) {
-          degrees.add(Degree(
-            title: data['title'],
-            level: 'postgraduate',
-          ));
-        }
-      }
-
-      return degrees;
+      await announcementsRef.push().set(newAnnouncement.toMap());
     } catch (error) {
-      print("Failed to fetch degrees: $error");
-      return [];
+      print('Failed to add announcement: $error');
+      throw error;
     }
   }
-*/
-  /*static Future<String> addDegree(Degree degree) async {
-    try {
-      final database = FirebaseDatabase.instance;
-      final ref = database.ref('degrees/${degree.level}').push();
-
-      await ref.set({
-        'title': degree.title,
-        'level': degree.level,
-      });
-
-      return 'Degree added successfully.';
-    } catch (error) {
-      print('Failed to add degree: $error');
-      return 'Failed to add degree: $error';
-    }
-  }
-*/
 }

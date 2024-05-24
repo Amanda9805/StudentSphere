@@ -1,3 +1,7 @@
+import 'package:flutter/foundation.dart';
+
+import 'announcement.dart';
+
 class Module {
   final String id;
   final String code;
@@ -6,6 +10,7 @@ class Module {
   final int credits;
   final String level;
   bool published;
+  List<Announcement>? announcements;
 
   Module({
     required this.id,
@@ -15,9 +20,9 @@ class Module {
     required this.credits,
     required this.level,
     required this.published,
+    this.announcements = const [],
   });
 
-  // Override the == operator to compare module instances by their properties
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -29,10 +34,10 @@ class Module {
         other.period == period &&
         other.credits == credits &&
         other.level == level &&
-        other.published == published;
+        other.published == published &&
+        listEquals(other.announcements, announcements);
   }
 
-  // Override the hashCode getter to use the properties of the module
   @override
   int get hashCode {
     return id.hashCode ^
@@ -41,11 +46,21 @@ class Module {
         period.hashCode ^
         credits.hashCode ^
         level.hashCode ^
-        published.hashCode;
+        published.hashCode ^
+        announcements.hashCode;
   }
 
-  // Factory method to create a Module from a map
   factory Module.fromMap(Map<dynamic, dynamic> map) {
+    print('Module Map Data: $map');
+    var announcementList = map['announcements'] != null &&
+            map['announcements'] is Map<dynamic, dynamic>
+        ? (map['announcements'] as Map<dynamic, dynamic>).entries.map((entry) {
+            print('Parsing announcement: ${entry.value}');
+            return Announcement.fromMap(entry.value as Map<String, dynamic>);
+          }).toList()
+        : <Announcement>[];
+
+    print('Parsed Announcements: $announcementList');
     return Module(
       id: map['id'] ?? '',
       code: map['code'] ?? '',
@@ -54,10 +69,10 @@ class Module {
       credits: map['credits'] ?? 0,
       level: map['level'] ?? '',
       published: map['published'] ?? false,
+      announcements: announcementList,
     );
   }
 
-  // Method to convert a Module to a map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -67,6 +82,8 @@ class Module {
       'credits': credits,
       'level': level,
       'published': published,
+      'announcements':
+          announcements!.map((announcement) => announcement.toMap()).toList(),
     };
   }
 }

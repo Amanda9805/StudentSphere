@@ -4,6 +4,7 @@ import '../auth_service.dart';
 import '../degree.dart';
 import '../module.dart';
 import 'navbarStudent.dart';
+import 'student_module_page.dart';
 
 class StudentHomePage extends StatefulWidget {
   final SphereUser? initialUser;
@@ -56,10 +57,8 @@ class StudentHome extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(60), // Set the desired height
         child: AppBar(
-          title: Text(
-            'Welcome Student, ${user!.fname} ${user!.lname}', 
-            style: TextStyle(color: Colors.white)
-            ),
+          title: Text('Welcome Student, ${user!.fname} ${user!.lname}',
+              style: TextStyle(color: Colors.white)),
           backgroundColor: Color(0xFF01324D),
           elevation: 0, // Remove the shadow
           shape: RoundedRectangleBorder(
@@ -100,7 +99,7 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
 
   int calculateTotalCredits() {
     return registeredModules.fold(0, (total, module) => total + module.credits);
-  } 
+  }
 
   Future<void> fetchRegisteredModules() async {
     try {
@@ -156,6 +155,16 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
     }
   }
 
+  void _navigateToModuleAnnouncements(BuildContext context, Module module) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ModuleAnnouncements(
+            module: module, user: widget.user, updateUser: widget.updateUser),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -164,24 +173,24 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
         children: [
           _buildModuleList('Registered Courses', registeredModules),
           Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    'Total Credits:',
-                    style: TextStyle(fontSize: 16),
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                  'Total Credits:',
+                  style: TextStyle(fontSize: 16),
+                ),
+                Text(
+                  calculateTotalCredits().toString(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Text(
-                    calculateTotalCredits().toString(),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );
@@ -222,6 +231,7 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
   Widget buildModuleCard(BuildContext context, List<Module> modules) {
     return DataTable(
       columns: [
+        DataColumn(label: Text(' ')),
         DataColumn(label: Text('Module Code')),
         DataColumn(label: Text('Module Title')),
         DataColumn(label: Text('Credits')),
@@ -230,6 +240,17 @@ class _StudentHomeDashboardState extends State<StudentHomeDashboard> {
       ],
       rows: modules.map((module) {
         return DataRow(cells: [
+          DataCell(
+            Tooltip(
+              message: 'Announcements',
+              child: IconButton(
+                icon: Icon(Icons.arrow_circle_right),
+                onPressed: () {
+                  _navigateToModuleAnnouncements(context, module);
+                },
+              ),
+            ),
+          ),
           DataCell(Text(module.code)),
           DataCell(Text(module.title)),
           DataCell(Text(module.credits.toString())),

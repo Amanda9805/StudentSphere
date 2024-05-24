@@ -8,11 +8,10 @@ import 'admin_help.dart';
 import 'admin_home_page.dart';
 import 'admin_modify_courses.dart';
 import 'admin_profile.dart';
-import 'available_courses.dart';
 
 class NavBar extends StatelessWidget {
   final SphereUser? user;
-  const NavBar({super.key, required this.user});
+  const NavBar({super.key, this.user});
 
   void _logout(BuildContext context) async {
     try {
@@ -32,13 +31,12 @@ class NavBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           const DrawerHeader(
-            decoration:
-                BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage('assets/images/bg2.jpg'),
-                      fit: BoxFit.cover,
-                    ),
-                ),
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bg2.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
             child: Text(
               'Menu',
               style: TextStyle(color: Colors.white, fontSize: 25),
@@ -78,7 +76,8 @@ class NavBar extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.person_2_rounded),
             title: const Text('Profile'),
-            onTap: () => { Navigator.push(
+            onTap: () => {
+              Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => AdminProfilePage(user: user)))
