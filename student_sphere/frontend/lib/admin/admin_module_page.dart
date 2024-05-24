@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:student_sphere/admin/admin_home_page.dart';
 import '../announcement.dart';
 import '../auth_service.dart';
 import '../module.dart';
@@ -39,6 +40,14 @@ class ManageAnnouncements extends StatelessWidget {
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(60), // Set the desired height
           child: AppBar(
+            leading: BackButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AdminHomePage(user: user)));
+              },
+            ),
             title: Text('${module.code}: Announcements',
                 style: TextStyle(color: Colors.white)),
             backgroundColor: Color(0xFF01324D),
@@ -156,26 +165,34 @@ class _AnnouncementsState extends State<Announcements> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: announcements.length,
-        itemBuilder: (context, index) {
-          final announcement = announcements[index];
-          // Format the date to exclude milliseconds
-          String formattedDate =
-              DateFormat.yMd().add_Hms().format(announcement.date);
-          return Card(
-            child: ListTile(
-              title: Text(announcement.title),
-              subtitle: Text(
-                '${announcement.description}\n$formattedDate', // Use the formatted date
-              ),
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          ListView.builder(
+            itemCount: announcements.length,
+            itemBuilder: (context, index) {
+              final announcement = announcements[index];
+              // Format the date to exclude milliseconds
+              String formattedDate =
+                  DateFormat.yMd().add_Hms().format(announcement.date);
+              return Card(
+                child: ListTile(
+                  title: Text(announcement.title),
+                  subtitle: Text(
+                    '${announcement.description}\n$formattedDate', // Use the formatted date
+                  ),
+                ),
+              );
+            },
+          ),
+          Positioned(
+            bottom: 16, // Adjust as needed
+            child: FloatingActionButton(
+              onPressed: _showAddAnnouncementDialog,
+              child: Icon(Icons.add),
             ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddAnnouncementDialog,
-        child: Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }
