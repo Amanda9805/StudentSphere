@@ -189,7 +189,11 @@ class _AnnouncementsState extends State<Announcements> {
             bottom: 16, // Adjust as needed
             child: FloatingActionButton(
               onPressed: _showAddAnnouncementDialog,
-              child: Icon(Icons.add),
+              backgroundColor: Color(0xFF01324D),
+              foregroundColor: Colors.white,
+              child: Icon(
+                Icons.add,
+              ),
             ),
           ),
         ],
