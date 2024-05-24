@@ -149,6 +149,9 @@ class _AnnouncementsState extends State<Announcements> {
                     DateFormat.yMd().add_Hms().format(announcement.date);
                 return Card(
                   child: ListTile(
+                    leading: Icon(
+                      Icons.notifications,
+                    ),
                     title: Text(announcement.title),
                     subtitle: Text(
                       '${announcement.description}\n$formattedDate', // Use the formatted date
