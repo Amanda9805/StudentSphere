@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:student_sphere/user.dart';
 import 'navbarAdmin.dart';
-import 'degree_page.dart';
+import 'admin_module_page.dart';
 
 class AdminModifyPage extends StatelessWidget {
   final SphereUser? user;
@@ -114,7 +114,8 @@ class _AdminDashboardState extends State<AdminModifyDashboard> {
     );
   }
 
-  Widget _buildDegreeCard(BuildContext context, String degreeTitle, String level, int index) {
+  Widget _buildDegreeCard(
+      BuildContext context, String degreeTitle, String level, int index) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       /*child: GestureDetector(
@@ -126,34 +127,34 @@ class _AdminDashboardState extends State<AdminModifyDashboard> {
             ),
           );
         },*/
-        child: Card(
-          child: ListTile(
-            title: Text(degreeTitle),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    // Add your edit logic here
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      if (level == 'Undergraduate') {
-                        undergraduateDegrees.removeAt(index);
-                      } else if (level == 'Postgraduate') {
-                        postgraduateDegrees.removeAt(index);
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
+      child: Card(
+        child: ListTile(
+          title: Text(degreeTitle),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  // Add your edit logic here
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  setState(() {
+                    if (level == 'Undergraduate') {
+                      undergraduateDegrees.removeAt(index);
+                    } else if (level == 'Postgraduate') {
+                      postgraduateDegrees.removeAt(index);
+                    }
+                  });
+                },
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }
@@ -221,7 +222,8 @@ class _AddDegreeModalState extends State<AddDegreeModal> {
         ElevatedButton(
           onPressed: () {
             // Add logic to save degree to Firebase
-            Navigator.of(context).pop({'title': selectedTitle.text, 'level': selectedLevel});
+            Navigator.of(context)
+                .pop({'title': selectedTitle.text, 'level': selectedLevel});
           },
           child: Text('Add'),
         ),
